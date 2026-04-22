@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Wildside\Userstamps\HasUserstamps;
+// use Wildside\Userstamps\HasUserstamps;
 
 class Address extends Model
 {
     /** @use HasFactory<\Database\Factories\AddressFactory> */
-    use HasFactory, SoftDeletes, HasUserstamps;
+    use HasFactory, SoftDeletes;  // , HasUserstamps;
 
     protected $fillable = [
         'addressable_type',

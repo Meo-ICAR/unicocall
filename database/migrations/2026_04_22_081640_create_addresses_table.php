@@ -24,8 +24,8 @@ return new class extends Migration {
 
             $table->timestamps();
             $table->softDeletes();
-            $table->userstamps();
-            $table->softUserstamps();
+            //   $table->userstamps();
+            //   $table->softUserstamps();
 
             // Indexes
             $table->index(['addressable_type', 'addressable_id'], 'addresses_addressable_type_addressable_id_index');

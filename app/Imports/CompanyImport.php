@@ -13,6 +13,12 @@ use Pxlrbt\FilamentExcel\Imports\ExcelImport;
 class CompanyImport extends ExcelImport
 {
     protected ?string $model = Company::class;
+    protected ?string $companyId = null;
+
+    public function __construct(?string $companyId = null)
+    {
+        $this->companyId = $companyId;
+    }
 
     public function collection(Collection $rows): void
     {
@@ -22,7 +28,7 @@ class CompanyImport extends ExcelImport
         try {
             // Use the ExcelImportService to handle the import
             $importService = app(ExcelImportService::class);
-            $result = $importService->importCompanies($tempFilePath);
+            $result = $importService->importCompanies($tempFilePath, $this->companyId);
 
             if (!$result['success']) {
                 throw ValidationException::withMessages([

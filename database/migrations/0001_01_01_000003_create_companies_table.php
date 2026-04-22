@@ -32,6 +32,7 @@ return new class extends Migration {
             $table->timestamp('payment_last_date')->nullable();
             $table->decimal('payment_startup', 10, 2)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

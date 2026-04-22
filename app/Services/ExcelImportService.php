@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Address;
 use App\Models\AddressType;
+use App\Models\Client;
 use App\Models\Company;
 use App\Models\Registration;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,7 @@ class ExcelImportService
     protected int $imported = 0;
     protected int $skipped = 0;
 
-    public function importCompanies(string $filePath): array
+    public function importCompanies(string $filePath, ?string $companyId = null): array
     {
         $this->errors = [];
         $this->imported = 0;
@@ -40,7 +41,7 @@ class ExcelImportService
                     continue;
                 }
 
-                $this->importCompanyRow($row, $rowIndex);
+                $this->importCompanyRow($row, $rowIndex, $companyId);
             }
 
             return [
@@ -62,7 +63,7 @@ class ExcelImportService
         }
     }
 
-    protected function importCompanyRow(array $row, int $rowIndex): void
+    protected function importCompanyRow(array $row, int $rowIndex, ?string $companyId = null): void
     {
         $data = [
             'name' => $this->getValue($row, 0),  // Denominazione
@@ -93,37 +94,69 @@ class ExcelImportService
         try {
             \DB::beginTransaction();
 
-            // Check if company already exists by VAT number or name
-            $existingCompany = Company::where('vat_number', $data['vat_number'])
-                ->orWhere('name', $data['name'])
-                ->first();
+            if ($companyId) {
+                // Import to existing company as client
+                $company = Company::find($companyId);
+                if (!$company) {
+                    $this->errors[] = "Riga {$rowIndex}: Azienda con ID {$companyId} non trovata";
+                    $this->skipped++;
+                    \DB::rollBack();
+                    return;
+                }
 
-            if ($existingCompany) {
-                $this->errors[] = "Riga {$rowIndex}: Azienda già esistente ({$data['name']} - {$data['vat_number']})";
-                $this->skipped++;
-                \DB::rollBack();
-                return;
+                // Create client
+                $client = Client::create([
+                    'company_id' => $company->id,
+                    'name' => $data['name'],
+                    'vat_number' => $data['vat_number'],
+                    'client_type' => 'standard',  // Default type
+                ]);
+
+                // Create address for client if any address field is provided
+                if (!empty($data['nazione']) ||
+                        !empty($data['cap']) ||
+                        !empty($data['provincia']) ||
+                        !empty($data['comune']) ||
+                        !empty($data['indirizzo']) ||
+                        !empty($data['numero_civico'])) {
+                    $this->createAddressForClient($client, $data, $rowIndex);
+                }
+
+                // Create registrations for client if provided
+                $this->createRegistrationsForClient($client, $data, $rowIndex);
+            } else {
+                // Import as new company
+                $existingCompany = Company::where('vat_number', $data['vat_number'])
+                    ->orWhere('name', $data['name'])
+                    ->first();
+
+                if ($existingCompany) {
+                    $this->errors[] = "Riga {$rowIndex}: Azienda già esistente ({$data['name']} - {$data['vat_number']})";
+                    $this->skipped++;
+                    \DB::rollBack();
+                    return;
+                }
+
+                // Create company
+                $company = Company::create([
+                    'name' => $data['name'],
+                    'vat_number' => $data['vat_number'],
+                    'company_type' => 'call center',  // Default type
+                ]);
+
+                // Create address if any address field is provided
+                if (!empty($data['nazione']) ||
+                        !empty($data['cap']) ||
+                        !empty($data['provincia']) ||
+                        !empty($data['comune']) ||
+                        !empty($data['indirizzo']) ||
+                        !empty($data['numero_civico'])) {
+                    $this->createAddressForCompany($company, $data, $rowIndex);
+                }
+
+                // Create registrations for each type if provided
+                $this->createRegistrationsForCompany($company, $data, $rowIndex);
             }
-
-            // Create company
-            $company = Company::create([
-                'name' => $data['name'],
-                'vat_number' => $data['vat_number'],
-                'company_type' => 'call center',  // Default type
-            ]);
-
-            // Create address if any address field is provided
-            if (!empty($data['nazione']) ||
-                    !empty($data['cap']) ||
-                    !empty($data['provincia']) ||
-                    !empty($data['comune']) ||
-                    !empty($data['indirizzo']) ||
-                    !empty($data['numero_civico'])) {
-                $this->createAddressForCompany($company, $data, $rowIndex);
-            }
-
-            // Create registrations for each type if provided
-            $this->createRegistrationsForCompany($company, $data, $rowIndex);
 
             $this->imported++;
             \DB::commit();
@@ -162,6 +195,33 @@ class ExcelImportService
         }
     }
 
+    protected function createAddressForClient(Client $client, array $data, int $rowIndex): void
+    {
+        try {
+            // Get Sede Legale address type (ID 5 from seeder)
+            $addressType = AddressType::find(5);
+            if (!$addressType) {
+                $this->errors[] = "Riga {$rowIndex}: Tipo indirizzo 'Sede Legale' non trovato";
+                return;
+            }
+
+            Address::create([
+                'addressable_type' => Client::class,
+                'addressable_id' => $client->id,
+                'name' => 'Sede Legale',
+                'country' => $data['nazione'] ?? null,
+                'zip_code' => $data['cap'] ?? null,
+                'city' => $data['comune'] ?? null,
+                'street' => $data['indirizzo'] ?? null,
+                'numero' => $data['numero_civico'] ?? null,
+                'address_type_id' => $addressType->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error creating address for client {$client->id}: " . $e->getMessage());
+            $this->errors[] = "Riga {$rowIndex}: Errore creazione indirizzo - " . $e->getMessage();
+        }
+    }
+
     protected function createRegistrationsForCompany(Company $company, array $data, int $rowIndex): void
     {
         $registrationTypes = [
@@ -173,6 +233,21 @@ class ExcelImportService
         foreach ($registrationTypes as $field => $typeName) {
             if (!empty($data[$field])) {
                 $this->createRegistrationForCompany($company, $data[$field], $typeName, $rowIndex);
+            }
+        }
+    }
+
+    protected function createRegistrationsForClient(Client $client, array $data, int $rowIndex): void
+    {
+        $registrationTypes = [
+            'indirizzo_telematico' => 'Indirizzo Telematico',
+            'email' => 'Email',
+            'pec' => 'PEC',
+        ];
+
+        foreach ($registrationTypes as $field => $typeName) {
+            if (!empty($data[$field])) {
+                $this->createRegistrationForClient($client, $data[$field], $typeName, $rowIndex);
             }
         }
     }
@@ -190,6 +265,23 @@ class ExcelImportService
             ]);
         } catch (\Exception $e) {
             Log::error("Error creating registration for company {$company->id}: " . $e->getMessage());
+            $this->errors[] = "Riga {$rowIndex}: Errore creazione registrazione - " . $e->getMessage();
+        }
+    }
+
+    protected function createRegistrationForClient(Client $client, string $value, string $type, int $rowIndex): void
+    {
+        try {
+            Registration::create([
+                'registrable_type' => Client::class,
+                'registrable_id' => $client->id,
+                'company_id' => $client->company_id,
+                'registration_type' => $type,
+                'value' => $value,
+                'start_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error creating registration for client {$client->id}: " . $e->getMessage());
             $this->errors[] = "Riga {$rowIndex}: Errore creazione registrazione - " . $e->getMessage();
         }
     }
