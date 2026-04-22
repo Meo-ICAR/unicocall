@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Registrations\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -12,7 +13,8 @@ class RegistrationForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
+                Select::make('company_id')
+                    ->relationship('company', 'name')
                     ->required(),
                 TextInput::make('name')
                     ->default('IVA'),

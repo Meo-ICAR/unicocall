@@ -17,15 +17,11 @@ use BackedEnum;
 class SoftwareCategoryResource extends Resource
 {
     protected static ?string $model = SoftwareCategory::class;
-
+    protected static bool $shouldRegisterNavigation = false;
     protected static bool $isScopedToTenant = false;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare2Stack;
-
     protected static ?string $recordTitleAttribute = 'name';
-
     protected static string|\UnitEnum|null $navigationGroup = 'Compliance';
-
     protected static ?int $navigationSort = 65;
 
     public static function form(Schema $schema): Schema

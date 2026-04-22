@@ -268,10 +268,10 @@ class WebsitesRelationManager extends RelationManager
     private function getCompanyIdFromOwner($ownerRecord): ?string
     {
         return match ($ownerRecord::class) {
-            'App\Models\PROFORMA\Company' => $ownerRecord->id,
-            'App\Models\Agent' => $ownerRecord->id,
+            'App\Models\Company' => $ownerRecord->id,
+
             'App\Models\Client' => $ownerRecord->id,
-            'App\Models\Principal' => $ownerRecord->id,
+
             default => null
         };
     }

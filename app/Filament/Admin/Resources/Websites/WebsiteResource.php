@@ -8,16 +8,16 @@ use App\Filament\Admin\Resources\Websites\Pages\ListWebsites;
 use App\Filament\Admin\Resources\Websites\Schemas\WebsiteForm;
 use App\Filament\Admin\Resources\Websites\Tables\WebsitesTable;
 use App\Models\Website;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class WebsiteResource extends Resource
 {
     protected static ?string $model = Website::class;
-
+    protected static bool $shouldRegisterNavigation = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

@@ -28,31 +28,11 @@ class AddressTypeSeeder extends Seeder
             ],
             [
                 'id' => 3,
-                'name' => 'Sede Legale',
+                'name' => 'Domicilio Digitale',
                 'is_person' => true,
             ],
             [
                 'id' => 4,
-                'name' => 'Sede Operativa',
-                'is_person' => true,
-            ],
-            [
-                'id' => 5,
-                'name' => 'Sede Amministrativa',
-                'is_person' => true,
-            ],
-            [
-                'id' => 6,
-                'name' => 'Sede Stabilimento',
-                'is_person' => true,
-            ],
-            [
-                'id' => 7,
-                'name' => 'Sede Secondaria',
-                'is_person' => true,
-            ],
-            [
-                'id' => 8,
                 'name' => 'Domicilio Fiscale',
                 'is_person' => true,
             ],

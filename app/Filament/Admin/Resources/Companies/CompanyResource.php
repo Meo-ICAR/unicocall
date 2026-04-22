@@ -8,11 +8,11 @@ use App\Filament\Admin\Resources\Companies\Pages\ListCompanies;
 use App\Filament\Admin\Resources\Companies\Schemas\CompanyForm;
 use App\Filament\Admin\Resources\Companies\Tables\CompaniesTable;
 use App\Models\Company;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class CompanyResource extends Resource
 {
@@ -35,7 +35,10 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Admin\RelationManagers\BranchesRelationManager::class,
+            \App\Filament\Admin\RelationManagers\EmployeesRelationManager::class,
+            \App\Filament\Admin\RelationManagers\ClientsRelationManager::class,
+            \App\Filament\Admin\RelationManagers\RegistrationsRelationManager::class,
         ];
     }
 
