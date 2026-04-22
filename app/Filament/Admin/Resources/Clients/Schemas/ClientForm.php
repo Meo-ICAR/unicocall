@@ -4,11 +4,11 @@ namespace App\Filament\Admin\Resources\Clients\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
 class ClientForm
@@ -21,13 +21,12 @@ class ClientForm
                     ->tabs([
                         Tabs\Tab::make('Dati Anagrafici')
                             ->schema([
-
                                 TextInput::make('name')
                                     ->required(),
                                 Toggle::make('is_person')->default(true)->live(),
-                                TextInput::make('first_name')->visible(fn (Get $get): bool => $get('is_person'))->required(),
-                                TextInput::make('tax_code')->visible(fn (Get $get): bool => $get('is_person'))->required(),
-                                TextInput::make('vat_number')->visible(fn (Get $get): bool => !$get('is_person'))->required(),
+                                TextInput::make('first_name')->visible(fn(Get $get): bool => $get('is_person'))->required(),
+                                TextInput::make('tax_code')->visible(fn(Get $get): bool => $get('is_person'))->required(),
+                                TextInput::make('vat_number')->visible(fn(Get $get): bool => !$get('is_person'))->required(),
                                 Select::make('client_type_id')
                                     ->relationship('clientType', 'name'),
                                 TextInput::make('email')
@@ -42,8 +41,8 @@ class ClientForm
                                     ->default('raccolta_dati'),
                                 DateTimePicker::make('acquired_at'),
                                 DateTimePicker::make('contract_signed_at'),
-                            ])->columns(2),
-
+                            ])
+                            ->columns(2),
                         Tabs\Tab::make('Privacy & Consensi')
                             ->schema([
                                 Toggle::make('privacy_consent')->required(),
@@ -62,8 +61,8 @@ class ClientForm
                                 TextInput::make('retention_period'),
                                 TextInput::make('extra_eu_transfer'),
                                 Textarea::make('security_measures')->columnSpanFull(),
-                            ])->columns(2),
-
+                            ])
+                            ->columns(2),
                         Tabs\Tab::make('Documenti')
                             ->schema([
                                 SpatieMediaLibraryFileUpload::make('documents')
@@ -73,10 +72,8 @@ class ClientForm
                                     ->openable()
                                     ->columnSpanFull(),
                             ]),
-
                         Tabs\Tab::make('Avanzate & Audit')
                             ->schema([
-
                                 Toggle::make('is_company_consultant')->default(false),
                                 Toggle::make('is_lead')->default(false),
                                 Toggle::make('is_structure')->default(false),
@@ -96,7 +93,8 @@ class ClientForm
                                 TextInput::make('blacklisted_by'),
                                 TextInput::make('salary')->numeric(),
                                 TextInput::make('salary_quote')->numeric(),
-                            ])->columns(3),
+                            ])
+                            ->columns(3),
                     ])
                     ->columnSpanFull(),
             ]);

@@ -8,6 +8,8 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -19,57 +21,24 @@ class CompaniesTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
                 TextColumn::make('name')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('vat_number')
-                    ->searchable(),
-                TextColumn::make('sponsor')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('company_type')
+                    ->sortable()
                     ->badge(),
-                IconColumn::make('is_iso27001_certified')
-                    ->boolean(),
+                TextColumn::make('adminUser.name')
+                    ->label('Admin User')
+                    ->searchable(),
                 TextColumn::make('contact_email')
                     ->searchable(),
                 TextColumn::make('dpo_email')
                     ->searchable(),
-                TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('smtp_host')
-                    ->searchable(),
-                TextColumn::make('smtp_port')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('smtp_encryption')
-                    ->searchable(),
-                IconColumn::make('smtp_enabled')
+                IconColumn::make('is_iso27001_certified')
                     ->boolean(),
-                IconColumn::make('smtp_verify_ssl')
-                    ->boolean(),
-                TextColumn::make('payment_frequency')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('payment')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('payment_last_date')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('payment_startup')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -85,7 +54,7 @@ class CompaniesTable
                     ->label('Importa Aziende')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->form([
-                        \Filament\Forms\Components\FileUpload::make('excel_file')
+                        FileUpload::make('excel_file')
                             ->label('File Excel')
                             ->required()
                             ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
@@ -97,8 +66,8 @@ class CompaniesTable
                             $firstCompany = Company::first();
 
                             // Check if user is super admin and current company is the first company
-                            if (!$user->is_super_admin || $user->current_company_id !== $firstCompany->id) {
-                                \Filament\Notifications\Notification::make()
+                            if (!$user->is_super_admin) {
+                                Notification::make()
                                     ->danger()
                                     ->title('Accesso Negato')
                                     ->body('Non hai i permessi per eseguire questa operazione.')
@@ -118,13 +87,13 @@ class CompaniesTable
                             unlink($fullPath);
 
                             if ($result['success']) {
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->success()
                                     ->title('Importazione Completata')
                                     ->body("Importate {$result['imported']} aziende. Saltate {$result['skipped']} righe.")
                                     ->send();
                             } else {
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->danger()
                                     ->title('Errore Importazione')
                                     ->body($result['error'] ?? "Errore durante l'importazione")
@@ -133,7 +102,7 @@ class CompaniesTable
 
                             if (!empty($result['errors'])) {
                                 foreach ($result['errors'] as $error) {
-                                    \Filament\Notifications\Notification::make()
+                                    Notification::make()
                                         ->warning()
                                         ->title('Attenzione')
                                         ->body($error)
@@ -141,7 +110,7 @@ class CompaniesTable
                                 }
                             }
                         } catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->danger()
                                 ->title('Errore')
                                 ->body('Si è verificato un errore: ' . $e->getMessage())

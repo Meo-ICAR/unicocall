@@ -27,15 +27,7 @@ class SoftwareApplicationsRelationManager extends RelationManager
         return SoftwareApplicationsTable::configure($table)
             ->headerActions([
                 Actions\CreateAction::make()
-                    ->label('Nuova Applicazione')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['company_id'] = $this->getOwnerRecord()->id;
-                        return $data;
-                    }),
-            ])
-            ->modifyQueryUsing(function (Builder $query) {
-                // Ensure we only get software applications for the current company
-                $query->where('company_id', $this->getOwnerRecord()->id);
-            });
+                    ->label('Nuova Applicazione'),
+            ]);
     }
 }

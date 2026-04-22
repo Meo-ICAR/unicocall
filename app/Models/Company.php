@@ -27,13 +27,6 @@ class Company extends Model
         'page_header',
         'page_footer',
         'user_id',
-        'smtp_host',
-        'smtp_port',
-        'smtp_encryption',
-        'smtp_enabled',
-        'smtp_verify_ssl',
-        'payment_frequency',
-        'payment',
         'payment_last_date',
         'payment_startup',
     ];

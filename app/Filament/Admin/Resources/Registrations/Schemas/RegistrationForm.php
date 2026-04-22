@@ -13,9 +13,6 @@ class RegistrationForm
     {
         return $schema
             ->components([
-                Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required(),
                 TextInput::make('name')
                     ->default('IVA'),
                 TextInput::make('registrable_type')

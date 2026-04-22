@@ -28,15 +28,7 @@ class RegistrationsRelationManager extends RelationManager
         return RegistrationsTable::configure($table)
             ->headerActions([
                 Actions\CreateAction::make()
-                    ->label('Nuova Registrazione')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['company_id'] = $this->getOwnerRecord()->id;
-                        return $data;
-                    }),
-            ])
-            ->modifyQueryUsing(function (Builder $query) {
-                // Ensure we only get registrations for the current company
-                $query->where('company_id', $this->getOwnerRecord()->id);
-            });
+                    ->label('Nuova Registrazione'),
+            ]);
     }
 }

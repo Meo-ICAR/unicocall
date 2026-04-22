@@ -27,15 +27,7 @@ class ClientsRelationManager extends RelationManager
         return ClientsTable::configure($table)
             ->headerActions([
                 Actions\CreateAction::make()
-                    ->label('Nuovo Cliente')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['company_id'] = $this->getOwnerRecord()->id;
-                        return $data;
-                    }),
-            ])
-            ->modifyQueryUsing(function (Builder $query) {
-                // Ensure we only get clients for the current company
-                $query->where('company_id', $this->getOwnerRecord()->id);
-            });
+                    ->label('Nuovo Cliente'),
+            ]);
     }
 }

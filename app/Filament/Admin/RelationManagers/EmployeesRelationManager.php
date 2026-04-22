@@ -27,15 +27,7 @@ class EmployeesRelationManager extends RelationManager
         return EmployeesTable::configure($table)
             ->headerActions([
                 Actions\CreateAction::make()
-                    ->label('Nuovo Dipendente')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['company_id'] = $this->getOwnerRecord()->id;
-                        return $data;
-                    }),
-            ])
-            ->modifyQueryUsing(function (Builder $query) {
-                // Ensure we only get employees for the current company
-                $query->where('company_id', $this->getOwnerRecord()->id);
-            });
+                    ->label('Nuovo Dipendente'),
+            ]);
     }
 }

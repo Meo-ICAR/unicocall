@@ -3,7 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Company;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,7 +19,7 @@ use Illuminate\Support\Collection;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements HasTenants
+class User extends Authenticatable implements FilamentUser, HasTenants
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -44,13 +46,80 @@ class User extends Authenticatable implements HasTenants
             ->withTimestamps();
     }
 
-    public function getTenants(Panel $panel): array|Collection
+    // Ritorna le aziende visibili nel menu a tendina dell'utente
+
+    public function getTenants(Panel $panel): Collection
     {
+        // Se è Super Admin, carica e mostra TUTTE le aziende nel sistema
+        if ($this->is_super_admin) {
+            return Company::all();
+        }
+
+        // Altrimenti, mostra solo le aziende a cui l'utente è collegato
         return $this->companies;
     }
 
+    // Verifica se l'utente ha il permesso di entrare in un'azienda specifica
     public function canAccessTenant(Model $tenant): bool
     {
+        // Il Super Admin può accedere sempre e ovunque
+        if ($this->is_super_admin) {
+            return true;
+        }
+
+        // Gli utenti normali possono accedere solo se esiste il record nella pivot
         return $this->companies()->whereKey($tenant)->exists();
+    }
+
+    // --- HELPER PER I RUOLI ---
+
+    // Ottiene il ruolo dell'utente nell'azienda attualmente attiva in Filament
+    public function getCurrentTenantRole(): ?string
+    {
+        $tenant = Filament::getTenant();
+
+        if (!$tenant) {
+            return null;
+        }
+
+        // Cerca l'utente nella pivot per questo tenant e restituisce il ruolo
+        return $this->companies()->whereKey($tenant->id)->first()?->pivot->role;
+    }
+
+    public function isTenantAdmin(): bool
+    {
+        return ($this->is_super_admin) || ($this->getCurrentTenantRole() === 'admin');
+    }
+
+    public function isTenantInspector(): bool
+    {
+        return ($this->is_super_admin) || ($this->getCurrentTenantRole() === 'inspector');
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if ($this->avatar_url) {
+            return $this->avatar_url;
+        }
+
+        $socialUser = $this->socialiteUsers()->whereNotNull('avatar')->first();
+        if ($socialUser) {
+            return $socialUser->avatar;
+        }
+
+        return null;
+    }
+
+    public function socialiteUsers(): HasMany
+    {
+        return $this->hasMany(SocialiteUser::class);
+    }
+
+    /**
+     * Determine if the user can access the Filament panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;  // All authenticated users can access the panel
     }
 }

@@ -13,7 +13,6 @@ class WebsiteForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id'),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('type'),

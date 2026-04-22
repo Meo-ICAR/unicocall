@@ -12,8 +12,6 @@ class BranchForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('branch_type'),
