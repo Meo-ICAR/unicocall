@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CompanyUser extends Pivot
 {
+    use HasFactory;
+
     protected $table = 'company_user';
 
     protected $fillable = [
@@ -65,7 +68,7 @@ class CompanyUser extends Pivot
      */
     public function getRoleLabelAttribute(): string
     {
-        return match($this->role) {
+        return match ($this->role) {
             'superadmin' => 'Super Amministratore',
             'admin' => 'Amministratore',
             'user' => 'Utente',

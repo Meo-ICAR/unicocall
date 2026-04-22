@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\RedirectIfHasCompany::class,
+            \App\Http\Middleware\HandleTenantAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         ]);
         $company = Company::first();
         $user = User::factory()->create([
-            'name' => 'admin',
+            'name' => 'superadmin',
             'email' => 'hassistosrl@gmail.com',
             'password' => bcrypt('password'),
             'company_name' => $company->name,
@@ -32,10 +32,26 @@ class DatabaseSeeder extends Seeder
             'current_company_id' => $company->id,
         ]);
 
-        CompanyUser::factory()->create([
-            'user_id' => $user->id,
-            'company_id' => $company->id,
+        $company->users()->attach($user->id, [
             'role' => 'superadmin',
+        ]);
+
+        $user = User::factory()->create([
+            'name' => 'admin',
+            'email' => 'piergiuseppe.meo@gmail.com',
+            'password' => bcrypt('password'),
+            'company_name' => $company->name,
+            'is_approved' => true,
+            'is_super_admin' => false,
+            'current_company_id' => $company->id,
+        ]);
+
+        $company->users()->attach($user->id, [
+            'role' => 'admin',
+        ]);
+
+        $company->update([
+            'user_id' => $user->id,
         ]);
 
         $this->call([

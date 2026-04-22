@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Wildside\Userstamps\HasUserstamps;
 
 class ClientType extends Model
 {
-    use HasFactory, SoftDeletes, HasUserstamps;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -163,7 +163,7 @@ class ClientType extends Model
     }
 
     // Static methods
-    public static function getActiveTypes(): \Illuminate\Database\Eloquent\Collection
+    public static function getActiveTypes(): Collection
     {
         return static::active()->ordered()->get();
     }
@@ -173,27 +173,27 @@ class ClientType extends Model
         return static::byName($name)->first();
     }
 
-    public static function getPersonTypes(): \Illuminate\Database\Eloquent\Collection
+    public static function getPersonTypes(): Collection
     {
         return static::whereIn('name', ['Privato', 'Professionista', 'Lead'])->ordered()->get();
     }
 
-    public static function getCompanyTypes(): \Illuminate\Database\Eloquent\Collection
+    public static function getCompanyTypes(): Collection
     {
         return static::whereIn('name', ['PMI', 'PA', 'Azienda', 'Istituzione'])->ordered()->get();
     }
 
-    public static function getLeadTypes(): \Illuminate\Database\Eloquent\Collection
+    public static function getLeadTypes(): Collection
     {
         return static::whereIn('name', ['Lead'])->ordered()->get();
     }
 
-    public static function getWithClientCount(): \Illuminate\Database\Eloquent\Collection
+    public static function getWithClientCount(): Collection
     {
         return static::withCount('clients')->ordered()->get();
     }
 
-    public static function getMostPopular(int $limit = 5): \Illuminate\Database\Eloquent\Collection
+    public static function getMostPopular(int $limit = 5): Collection
     {
         return static::withCount('clients')
             ->orderBy('clients_count', 'desc')
