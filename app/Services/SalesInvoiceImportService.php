@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Company;
 use App\Models\Registration;
 use App\Models\SalesInvoice;
+use App\Services\ExcelImportHelpers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
@@ -55,6 +56,19 @@ class SalesInvoiceImportService
             foreach ($dataRows as $index => $row) {
                 $rowIndex = $index + 2;  // Excel row number (1-based + header)
 
+                // Validate row structure
+                if (!is_array($row)) {
+                    $this->errors[] = "Riga {$rowIndex}: Dati riga non validi - formato non corretto";
+                    $this->skipped++;
+                    continue;
+                }
+
+                if (count($row) < 24) {  // Expected 24 columns (0-23)
+                    $this->errors[] = "Riga {$rowIndex}: Numero colonne insufficiente - richieste 24, trovate " . count($row);
+                    $this->skipped++;
+                    continue;
+                }
+
                 if (empty($row[0]) && empty($row[7])) {
                     $this->skipped++;
                     continue;
@@ -95,32 +109,32 @@ class SalesInvoiceImportService
         try {
             // Map Excel columns to database fields
             $data = [
-                'numero' => $this->cleanString($row[0] ?? ''),
-                'nome_file' => $this->cleanString($row[1] ?? ''),
-                'id_sdi' => $this->cleanString($row[2] ?? ''),
-                'data_invio' => $this->parseDate($row[3] ?? ''),
-                'data_documento' => $this->parseDate($row[4] ?? ''),
-                'tipo_documento' => $this->cleanString($row[5] ?? ''),
-                'tipo_cliente' => $this->cleanString($row[6] ?? ''),
-                'cliente' => $this->cleanString($row[7] ?? ''),
-                'partita_iva' => $this->cleanVatNumber($row[8] ?? ''),
-                'codice_fiscale' => $this->cleanString($row[9] ?? ''),
-                'indirizzo_telematico' => $this->cleanString($row[10] ?? ''),
-                'metodo_pagamento' => $this->cleanString($row[11] ?? ''),
-                'totale_imponibile' => $this->parseAmount($row[12] ?? ''),
-                'totale_escluso_iva_n1' => $this->parseAmount($row[13] ?? ''),
-                'totale_non_soggetto_iva_n2' => $this->parseAmount($row[14] ?? ''),
-                'totale_non_imponibile_iva_n3' => $this->parseAmount($row[15] ?? ''),
-                'totale_esente_iva_n4' => $this->parseAmount($row[16] ?? ''),
-                'totale_regime_margine_iva_n5' => $this->parseAmount($row[17] ?? ''),
-                'totale_inversione_contabile_n6' => $this->parseAmount($row[18] ?? ''),
-                'totale_iva_assolta_altro_stato_ue_n7' => $this->parseAmount($row[19] ?? ''),
-                'totale_iva' => $this->parseAmount($row[20] ?? ''),
-                'totale_documento' => $this->parseAmount($row[21] ?? ''),
-                'netto_a_pagare' => $this->parseAmount($row[22] ?? ''),
-                'incassi' => $this->cleanString($row[23] ?? ''),
-                'data_incasso' => $this->parseDate($row[24] ?? ''),
-                'stato' => $this->cleanString($row[25] ?? ''),
+                'numero' => ExcelImportHelpers::cleanString($row[0] ?? ''),
+                'nome_file' => ExcelImportHelpers::cleanString($row[1] ?? ''),
+                'id_sdi' => ExcelImportHelpers::cleanString($row[2] ?? ''),
+                'data_invio' => ExcelImportHelpers::parseDate($row[3] ?? ''),
+                'data_documento' => ExcelImportHelpers::parseDate($row[4] ?? ''),
+                'tipo_documento' => ExcelImportHelpers::cleanString($row[5] ?? ''),
+                'tipo_cliente' => ExcelImportHelpers::cleanString($row[6] ?? ''),
+                'cliente' => ExcelImportHelpers::cleanString($row[7] ?? ''),
+                'partita_iva' => ExcelImportHelpers::cleanVatNumber($row[8] ?? ''),
+                'codice_fiscale' => ExcelImportHelpers::cleanFiscalCode($row[9] ?? ''),
+                'indirizzo_telematico' => ExcelImportHelpers::cleanString($row[10] ?? ''),
+                'metodo_pagamento' => ExcelImportHelpers::cleanString($row[11] ?? ''),
+                'totale_imponibile' => ExcelImportHelpers::parseAmount($row[12] ?? ''),
+                'totale_escluso_iva_n1' => ExcelImportHelpers::parseAmount($row[13] ?? ''),
+                'totale_non_soggetto_iva_n2' => ExcelImportHelpers::parseAmount($row[14] ?? ''),
+                'totale_non_imponibile_iva_n3' => ExcelImportHelpers::parseAmount($row[15] ?? ''),
+                'totale_esente_iva_n4' => ExcelImportHelpers::parseAmount($row[16] ?? ''),
+                'totale_regime_margine_iva_n5' => ExcelImportHelpers::parseAmount($row[17] ?? ''),
+                'totale_inversione_contabile_n6' => ExcelImportHelpers::parseAmount($row[18] ?? ''),
+                'totale_iva_assolta_altro_stato_ue_n7' => ExcelImportHelpers::parseAmount($row[19] ?? ''),
+                'totale_iva' => ExcelImportHelpers::parseAmount($row[20] ?? ''),
+                'totale_documento' => ExcelImportHelpers::parseAmount($row[21] ?? ''),
+                'netto_a_pagare' => ExcelImportHelpers::parseAmount($row[22] ?? ''),
+                'incassi' => ExcelImportHelpers::cleanString($row[23] ?? ''),
+                'data_incasso' => ExcelImportHelpers::parseDate($row[24] ?? ''),
+                'stato' => ExcelImportHelpers::cleanString($row[25] ?? ''),
                 'company_id' => $company->id,
             ];
 
@@ -147,89 +161,6 @@ class SalesInvoiceImportService
             $this->errors[] = "Riga {$rowIndex}: Errore durante l'importazione - " . $e->getMessage();
             Log::error("Sales invoice import error on row {$rowIndex}: " . $e->getMessage());
         }
-    }
-
-    /**
-     * Clean and trim string values
-     */
-    protected function cleanString(?string $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        return trim(preg_replace('/\s+/', ' ', $value));
-    }
-
-    /**
-     * Clean VAT number (remove spaces, dots, etc.)
-     */
-    protected function cleanVatNumber(?string $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        return preg_replace('/[^0-9]/', '', $value);
-    }
-
-    /**
-     * Parse date from Excel format
-     */
-    protected function parseDate(?string $value): ?\DateTime
-    {
-        if (empty($value)) {
-            return null;
-        }
-
-        try {
-            // Try Excel serial date format first
-            if (is_numeric($value)) {
-                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value);
-                return $date;
-            }
-
-            // Try Italian date format
-            $date = \DateTime::createFromFormat('m/d/Y', $value);
-            if ($date) {
-                return $date;
-            }
-
-            // Try other formats
-            $date = \DateTime::createFromFormat('d/m/Y', $value);
-            if ($date) {
-                return $date;
-            }
-
-            $date = \DateTime::createFromFormat('Y-m-d', $value);
-            if ($date) {
-                return $date;
-            }
-
-            // Try to create from string
-            return new \DateTime($value);
-        } catch (\Exception $e) {
-            Log::warning("Could not parse date: {$value}");
-            return null;
-        }
-    }
-
-    /**
-     * Parse amount from Italian currency format
-     */
-    protected function parseAmount(?string $value): ?float
-    {
-        if (empty($value)) {
-            return 0.0;
-        }
-
-        // Remove currency symbol, spaces, and replace comma with dot
-        $cleaned = str_replace(['EUR', 'EUR ', ' ', ''], '', $value);
-        $cleaned = str_replace(['.', ','], ['', '.'], $cleaned);
-
-        $amount = (float) $cleaned;
-
-        return $amount;
     }
 
     /**

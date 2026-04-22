@@ -128,17 +128,20 @@ class CompaniesTable
                                 ->body('Si è verificato un errore: ' . $e->getMessage())
                                 ->send();
                         }
-                    })
-                    ->visible(function () {
-                        $user = Auth::user();
-                        $firstCompany = Company::first();
-
-                        // Only show for super admins in the first company
-                        return $user &&
-                            $user->is_super_admin &&
-                            $firstCompany &&
-                            $user->current_company_id === $firstCompany->id;
                     }),
+
+                /*
+                 * ->visible(function () {
+                 *     $user = Auth::user();
+                 *     $firstCompany = Company::first();
+                 *
+                 *     // Only show for super admins in the first company
+                 *     return $user &&
+                 *         $user->is_super_admin &&
+                 *         $firstCompany &&
+                 *         $user->current_company_id === $firstCompany->id;
+                 * })
+                 */
             ]);
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('sales_invoices', function (Blueprint $table) {
-            $table->uuid('id')->primary()->comment('UUID v4 generato da Laravel');
+            $table->id();
             $table->string('numero')->comment('Numero fattura');
             $table->string('nome_file')->nullable()->comment('Nome del file XML');
             $table->string('id_sdi')->nullable()->comment('ID SdI - Sistema di Interscambio');
