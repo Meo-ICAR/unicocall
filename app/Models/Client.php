@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
-
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Client extends Model implements HasMedia
 {
@@ -68,5 +68,82 @@ class Client extends Model implements HasMedia
     public function leadSource(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'leadsource_id');
+    }
+
+    /**
+     * Get the sales invoices for this client based on VAT number
+     */
+    public function salesInvoices(): HasMany
+    {
+        return $this->hasMany(SalesInvoice::class, 'partita_iva', 'vat_number');
+    }
+
+    /**
+     * Get the purchase invoices for this client based on VAT number
+     */
+    public function purchaseInvoices(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoice::class, 'partita_iva', 'vat_number');
+    }
+
+    /**
+     * Get all invoices (sales + purchase) for this client
+     * Returns a collection with both sales and purchase invoices
+     */
+    public function getAllInvoices()
+    {
+        $salesInvoices = $this->salesInvoices()->get()->map(function ($invoice) {
+            $invoice->type = 'sales';
+            $invoice->label = 'Fattura Emessa';
+            return $invoice;
+        });
+
+        $purchaseInvoices = $this->purchaseInvoices()->get()->map(function ($invoice) {
+            $invoice->type = 'purchase';
+            $invoice->label = 'Fattura Ricevuta';
+            return $invoice;
+        });
+
+        return $salesInvoices->concat($purchaseInvoices)->sortBy('data_documento');
+    }
+
+    /**
+     * Get total amount of unpaid sales invoices
+     */
+    public function getUnpaidSalesInvoicesTotal(): float
+    {
+        return $this->salesInvoices()->where('incassi', 'Non incassata')->sum('netto_a_pagare');
+    }
+
+    /**
+     * Get total amount of unpaid purchase invoices
+     */
+    public function getUnpaidPurchaseInvoicesTotal(): float
+    {
+        return $this->purchaseInvoices()->where('pagamenti', 'Non pagata')->sum('netto_a_pagare');
+    }
+
+    /**
+     * Get total IVA amount from sales invoices
+     */
+    public function getTotalSalesIva(): float
+    {
+        return $this->salesInvoices()->sum('totale_iva');
+    }
+
+    /**
+     * Get total IVA amount from purchase invoices (deductible)
+     */
+    public function getTotalPurchaseIva(): float
+    {
+        return $this->purchaseInvoices()->sum('totale_iva');
+    }
+
+    /**
+     * Get net IVA position (sales IVA - purchase IVA)
+     */
+    public function getNetIvaPosition(): float
+    {
+        return $this->getTotalSalesIva() - $this->getTotalPurchaseIva();
     }
 }

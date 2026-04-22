@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Models;
+
+use App\Models\Company;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
+
+class SoftwareApplication extends Model
+{
+    use HasFactory;
+
+    protected $connection = 'mysql_compliance';
+
+    protected $fillable = [
+        'name',
+        'provider_name',
+        'software_category_id',
+        'website_url',
+        'company_id',
+        'api_url',
+        'sandbox_url',
+        'api_key_url',
+        'api_parameters',
+        'is_cloud',
+        'apikey',
+        'wallet_balance',
+    ];
+
+    protected $casts = [
+        'is_cloud' => 'boolean',
+        'wallet_balance' => 'decimal:2',
+    ];
+
+    public function apiConfigurations(): HasMany
+    {
+        return $this->hasMany(ApiConfiguration::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
+
+    public function softwareCategory(): BelongsTo
+    {
+        return $this->belongsTo(SoftwareCategory::class, 'software_category_id');
+    }
+}

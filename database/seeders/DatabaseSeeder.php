@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
+use App\Models\CompanyUser;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,21 +21,27 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CompanySeeder::class,
         ]);
-
-        User::factory()->create([
+        $company = Company::first();
+        $user = User::factory()->create([
             'name' => 'admin',
             'email' => 'hassistosrl@gmail.com',
             'password' => bcrypt('password'),
-            'company_name' => Company::first()->name,
+            'company_name' => $company->name,
             'is_approved' => true,
             'is_super_admin' => true,
-            'current_company_id' => Company::first()->id,
+            'current_company_id' => $company->id,
+        ]);
+
+        CompanyUser::factory()->create([
+            'user_id' => $user->id,
+            'company_id' => $company->id,
+            'role' => 'superadmin',
         ]);
 
         $this->call([
             ClientTypeSeeder::class,
             AddressTypeSeeder::class,
-            CompanySeeder::class,
+            //   CompanySeeder::class,
             //     FacebookLeadAcquisitionSeeder::class,
             //     LeadAcquisitionProcessSeeder::class,
             //     LeadCessionWorkflowSeeder::class,

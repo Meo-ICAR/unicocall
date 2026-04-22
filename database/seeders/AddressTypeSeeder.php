@@ -13,23 +13,96 @@ class AddressTypeSeeder extends Seeder
      */
     public function run(): void
     {
+        $now = now();
+
         $addressTypes = [
-            ['id' => 1, 'name' => 'Residenza', 'is_person' => 1],
-            ['id' => 2, 'name' => 'Domicilio', 'is_person' => 1],
-            ['id' => 3, 'name' => 'Domicilio Legale', 'is_person' => 0],
-            ['id' => 4, 'name' => 'Domicilio Operativo', 'is_person' => 0],
-            ['id' => 5, 'name' => 'Sede Legale', 'is_person' => 0],
-            ['id' => 6, 'name' => 'Sede Operativa', 'is_person' => 0],
+            [
+                'id' => 1,
+                'name' => 'Residenza',
+                'is_person' => true,
+            ],
+            [
+                'id' => 2,
+                'name' => 'Domicilio',
+                'is_person' => true,
+            ],
+            [
+                'id' => 3,
+                'name' => 'Sede Legale',
+                'is_person' => true,
+            ],
+            [
+                'id' => 4,
+                'name' => 'Sede Operativa',
+                'is_person' => true,
+            ],
+            [
+                'id' => 5,
+                'name' => 'Sede Amministrativa',
+                'is_person' => true,
+            ],
+            [
+                'id' => 6,
+                'name' => 'Sede Stabilimento',
+                'is_person' => true,
+            ],
+            [
+                'id' => 7,
+                'name' => 'Sede Secondaria',
+                'is_person' => true,
+            ],
+            [
+                'id' => 8,
+                'name' => 'Domicilio Fiscale',
+                'is_person' => true,
+            ],
+            [
+                'id' => 9,
+                'name' => 'Domicilio Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 10,
+                'name' => 'Sede Legale Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 11,
+                'name' => 'Sede Operativa Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 12,
+                'name' => 'Sede Amministrativa Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 13,
+                'name' => 'Sede Stabilimento Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 14,
+                'name' => 'Sede Secondaria Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 15,
+                'name' => 'Sede Occasionale Aziendale',
+                'is_person' => false,
+            ],
+            [
+                'id' => 16,
+                'name' => 'Domicilio Digitale',
+                'is_person' => false,
+            ],
         ];
 
-        foreach ($addressTypes as $type) {
-            AddressType::updateOrCreate(
-                ['id' => $type['id']],
-                [
-                    'name' => $type['name'],
-                    'is_person' => $type['is_person'],
-                ]
-            );
+        foreach ($addressTypes as $addressType) {
+            AddressType::create($addressType);
+            $this->command->info("Created address type: {$addressType['name']} (" . ($addressType['is_person'] ? 'Persona' : 'Azienda') . ')');
         }
+
+        $this->command->info('AddressType seeder completed successfully!');
     }
 }

@@ -2,44 +2,364 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+// use Wildside\Userstamps\HasUserstamps;
 
 class Employee extends Model
 {
-    protected $guarded = [];
+    use HasFactory, SoftDeletes;  // , HasUserstamps;
 
-    protected function casts(): array
+    protected $fillable = [
+        'company_id',
+        'company_branch_id',
+        'user_id',
+        'coordinated_by_id',
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'fiscal_code',
+        'vat_number',
+        'birth_date',
+        'birth_place',
+        'birth_province',
+        'gender',
+        'nationality',
+        'address',
+        'city',
+        'province',
+        'postal_code',
+        'country',
+        'hiring_date',
+        'termination_date',
+        'employment_type',
+        'role',
+        'department',
+        'salary',
+        'is_supervisor',
+        'is_structure',
+        'is_ghost',
+        'notes',
+    ];
+
+    protected $casts = [
+        'hiring_date' => 'date',
+        'termination_date' => 'date',
+        'birth_date' => 'date',
+        'salary' => 'decimal:2',
+        'is_supervisor' => 'boolean',
+        'is_structure' => 'boolean',
+        'is_ghost' => 'boolean',
+    ];
+
+    // Scopes
+    public function scopeActive($query)
     {
-        return [
-            'hiring_date' => 'date',
-            'termination_date' => 'date',
-            'is_structure' => 'boolean',
-            'is_ghost' => 'boolean',
-        ];
+        return $query->whereNull('termination_date');
     }
 
-    public function company()
+    public function scopeTerminated($query)
+    {
+        return $query->whereNotNull('termination_date');
+    }
+
+    public function scopeSupervisors($query)
+    {
+        return $query->where('is_supervisor', true);
+    }
+
+    public function scopeRegularEmployees($query)
+    {
+        return $query->where('is_supervisor', false);
+    }
+
+    public function scopeByCompany($query, string $companyId)
+    {
+        return $query->where('company_id', $companyId);
+    }
+
+    public function scopeByBranch($query, string $branchId)
+    {
+        return $query->where('company_branch_id', $branchId);
+    }
+
+    public function scopeByDepartment($query, string $department)
+    {
+        return $query->where('department', $department);
+    }
+
+    public function scopeByRole($query, string $role)
+    {
+        return $query->where('role', $role);
+    }
+
+    public function scopeStructure($query)
+    {
+        return $query->where('is_structure', true);
+    }
+
+    public function scopeGhost($query)
+    {
+        return $query->where('is_ghost', true);
+    }
+
+    public function scopeReal($query)
+    {
+        return $query->where('is_ghost', false);
+    }
+
+    // Relationships
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function branch()
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class, 'company_branch_id');
     }
 
-    public function supervisor()
+    public function supervisor(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'coordinated_by_id');
     }
 
-    public function subordinates()
+    public function subordinates(): HasMany
     {
         return $this->hasMany(Employee::class, 'coordinated_by_id');
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Accessors
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    public function getFullNameReverseAttribute(): string
+    {
+        return trim($this->last_name . ' ' . $this->first_name);
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return is_null($this->termination_date);
+    }
+
+    public function getIsActiveLabelAttribute(): string
+    {
+        return $this->is_active ? 'Attivo' : 'Terminato';
+    }
+
+    public function getIsSupervisorLabelAttribute(): string
+    {
+        return $this->is_supervisor ? 'Supervisore' : 'Dipendente';
+    }
+
+    public function getEmploymentStatusLabelAttribute(): string
+    {
+        if ($this->is_ghost) {
+            return 'Fantasma';
+        }
+        if ($this->is_structure) {
+            return 'Struttura';
+        }
+        return $this->is_active ? 'Attivo' : 'Terminato';
+    }
+
+    public function getAgeAttribute(): ?int
+    {
+        return $this->birth_date ? $this->birth_date->age : null;
+    }
+
+    public function getYearsOfServiceAttribute(): ?int
+    {
+        if (!$this->hiring_date) {
+            return null;
+        }
+
+        $endDate = $this->termination_date ?? now();
+        return $this->hiring_date->diffInYears($endDate);
+    }
+
+    public function getFullAddressAttribute(): string
+    {
+        $parts = array_filter([
+            $this->address,
+            $this->postal_code,
+            $this->city,
+            $this->province,
+            $this->country,
+        ]);
+
+        return implode(', ', $parts);
+    }
+
+    public function getFormattedSalaryAttribute(): string
+    {
+        return $this->salary ? 'EUR ' . number_format($this->salary, 2, ',', '.') : 'N/D';
+    }
+
+    // Methods
+    public function isActive(): bool
+    {
+        return $this->is_active;
+    }
+
+    public function isSupervisor(): bool
+    {
+        return $this->is_supervisor;
+    }
+
+    public function isStructure(): bool
+    {
+        return $this->is_structure;
+    }
+
+    public function isGhost(): bool
+    {
+        return $this->is_ghost;
+    }
+
+    public function isReal(): bool
+    {
+        return !$this->is_ghost;
+    }
+
+    public function terminate(\DateTime|string $terminationDate = null): void
+    {
+        $date = $terminationDate ?? now();
+        $this->update(['termination_date' => $date]);
+    }
+
+    public function reactivate(): void
+    {
+        $this->update(['termination_date' => null]);
+    }
+
+    public function makeSupervisor(): void
+    {
+        $this->update(['is_supervisor' => true]);
+    }
+
+    public function makeRegularEmployee(): void
+    {
+        $this->update(['is_supervisor' => false]);
+    }
+
+    public function assignToBranch(string $branchId): void
+    {
+        $this->update(['company_branch_id' => $branchId]);
+    }
+
+    public function assignSupervisor(?string $supervisorId): void
+    {
+        $this->update(['coordinated_by_id' => $supervisorId]);
+    }
+
+    public function hasSubordinates(): bool
+    {
+        return $this->subordinates()->exists();
+    }
+
+    public function getSubordinateCount(): int
+    {
+        return $this->subordinates()->count();
+    }
+
+    public function getActiveSubordinateCount(): int
+    {
+        return $this->subordinates()->active()->count();
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return !$this->hasSubordinates() && !$this->is_structure;
+    }
+
+    public function getHierarchyLevel(): int
+    {
+        $level = 0;
+        $current = $this;
+
+        while ($current->supervisor) {
+            $level++;
+            $current = $current->supervisor;
+        }
+
+        return $level;
+    }
+
+    public function getDirectAndIndirectSubordinates(): \Illuminate\Database\Eloquent\Collection
+    {
+        $allSubordinates = collect();
+        $directSubordinates = $this->subordinates;
+
+        foreach ($directSubordinates as $subordinate) {
+            $allSubordinates->push($subordinate);
+            $allSubordinates = $allSubordinates->merge($subordinate->getDirectAndIndirectSubordinates());
+        }
+
+        return $allSubordinates;
+    }
+
+    // Static methods
+    public static function getActiveEmployees(): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::active()->get();
+    }
+
+    public static function getSupervisors(): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::supervisors()->active()->get();
+    }
+
+    public static function getByCompany(string $companyId): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::byCompany($companyId)->get();
+    }
+
+    public static function getByBranch(string $branchId): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::byBranch($branchId)->get();
+    }
+
+    public static function getDepartmentEmployees(string $department): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::byDepartment($department)->active()->get();
+    }
+
+    public static function getTopLevelSupervisors(): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::supervisors()
+            ->whereNull('coordinated_by_id')
+            ->active()
+            ->get();
+    }
+
+    public static function getWithSubordinateCount(): \Illuminate\Database\Eloquent\Collection
+    {
+        return static::withCount('subordinates')->get();
+    }
+
+    public static function getEmployeeStatistics(): array
+    {
+        return [
+            'total' => static::count(),
+            'active' => static::active()->count(),
+            'terminated' => static::terminated()->count(),
+            'supervisors' => static::supervisors()->active()->count(),
+            'regular' => static::regularEmployees()->active()->count(),
+            'structure' => static::structure()->count(),
+            'ghost' => static::ghost()->count(),
+        ];
     }
 }

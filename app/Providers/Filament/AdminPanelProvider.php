@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->tenant(\App\Models\Company::class)
+            ->tenant(\App\Models\Company::class, slugAttribute: 'id')
             ->tenantRegistration(\App\Filament\Admin\Pages\RegisterCompany::class)
             ->tenantProfile(\App\Filament\Admin\Pages\EditCompanyProfile::class)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')

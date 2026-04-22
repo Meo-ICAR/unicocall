@@ -12,15 +12,17 @@ return new class extends Migration {
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id()->comment('ID intero autoincrementante');
-            $table->string('addressable_type')->comment('Classe del Modello collegato (es. App\Models\Client)');
-            $table->string('addressable_id')->comment('ID del Modello (VARCHAR 36 per supportare sia UUID che Integer)');
+
             $table->string('name')->nullable()->comment('Descrizione');
+            $table->unsignedBigInteger('address_type_id')->nullable()->comment('Relazione con tipologia indirizzo');
+            $table->string('street')->nullable()->comment('Via');
             $table->string('numero')->nullable()->comment('Numero civico o identificativo indirizzo');
-            $table->string('street')->nullable()->comment('Via e numero civico');
             $table->string('city')->nullable()->comment('Città o Comune');
             $table->string('zip_code', 20)->nullable()->comment('CAP (Codice di Avviamento Postale)');
             $table->string('country')->nullable()->comment('Paese');
-            $table->unsignedBigInteger('address_type_id')->nullable()->comment('Relazione con tipologia indirizzo');
+            $table->string('addressable_type')->comment('Classe del Modello collegato (es. App\Models\Client)');
+            $table->string('addressable_id')->comment('ID del Modello (VARCHAR 36 per supportare sia UUID che Integer)');
+            $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
 
             $table->timestamps();
             $table->softDeletes();

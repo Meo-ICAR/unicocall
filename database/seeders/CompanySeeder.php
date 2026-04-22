@@ -18,7 +18,7 @@ class CompanySeeder extends Seeder
             $company = Company::create([
                 'name' => 'Hassisto Srl',
                 'vat_number' => '09006331210',
-                'company_type' => 'call center',
+                'company_type' => 'sw house',
             ]);
 
             $this->command->info("Company created: {$company->name} (ID: {$company->id})");

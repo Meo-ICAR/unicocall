@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Filament\Admin\Resources\PurchaseInvoices\Pages;
+
+use App\Filament\Admin\Resources\PurchaseInvoices\PurchaseInvoiceResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreatePurchaseInvoice extends CreateRecord
+{
+    protected static string $resource = PurchaseInvoiceResource::class;
+}
