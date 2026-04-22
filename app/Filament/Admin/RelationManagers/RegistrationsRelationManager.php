@@ -26,6 +26,7 @@ class RegistrationsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return RegistrationsTable::configure($table)
+            ->defaultSort('code')
             ->headerActions([
                 Actions\CreateAction::make()
                     ->label('Nuova Registrazione'),

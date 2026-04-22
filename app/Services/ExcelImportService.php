@@ -65,24 +65,61 @@ class ExcelImportService
 
     protected function importCompanyRow(array $row, int $rowIndex, ?string $companyId = null): void
     {
+        // Codice cliente,
+        // Tipo Cliente,
+        // Indirizzo telematico,
+        // Email,
+        // PEC,
+        // Telefono,
+        // ID Paese,
+        // Partita Iva,
+        // Codice Fiscale,
+        // Denominazione,
+        // Nome,
+        // Cognome,
+        // Codice EORI,
+        // Nazione,
+        // CAP,
+        // Provincia,
+        // Comune,
+        // Indirizzo,
+        // Numero civico,
+        // Beneficiario,
+        // Condizioni di pagamento,
+        // Metodo di pagamento,
+        // Banca
+
         $data = [
-            'name' => $this->getValue($row, 0),  // Denominazione
-            'vat_number' => $this->getValue($row, 1),  // Partita IVA
-            'nazione' => $this->getValue($row, 2),  // Nazione
-            'cap' => $this->getValue($row, 3),  // CAP
-            'provincia' => $this->getValue($row, 4),  // Provincia
-            'comune' => $this->getValue($row, 5),  // Comune
-            'indirizzo' => $this->getValue($row, 6),  // Indirizzo
-            'numero_civico' => $this->getValue($row, 7),  // Numero civico
-            'indirizzo_telematico' => $this->getValue($row, 8),  // Indirizzo telematico
-            'email' => $this->getValue($row, 9),  // Email
-            'pec' => $this->getValue($row, 10),  // PEC
+            'codice_cliente' => $this->getValue($row, 0),  // Codice cliente
+            'tipo_cliente' => $this->getValue($row, 1),  // Tipo Cliente
+            'indirizzo_telematico' => $this->getValue($row, 2),  // Indirizzo telematico
+            'email' => $this->getValue($row, 3),  // Email
+            'pec' => $this->getValue($row, 4),  // PEC
+            'telefono' => $this->getValue($row, 5),  // Telefono
+            'id_paese' => $this->getValue($row, 6),  // ID Paese
+            'partita_iva' => $this->getValue($row, 7),  // Partita IVA
+            'codice_fiscale' => $this->getValue($row, 8),  // Codice Fiscale
+            'denominazione' => $this->getValue($row, 9),  // Denominazione
+            'nome' => $this->getValue($row, 10),  // Nome
+            'cognome' => $this->getValue($row, 11),  // Cognome
+            'codice_eori' => $this->getValue($row, 12),  // Codice EORI
+            'nazione' => $this->getValue($row, 13),  // Nazione
+            'cap' => $this->getValue($row, 14),  // CAP
+            'provincia' => $this->getValue($row, 15),  // Provincia
+            'comune' => $this->getValue($row, 16),  // Comune
+            'indirizzo' => $this->getValue($row, 17),  // Indirizzo
+            'numero_civico' => $this->getValue($row, 18),  // Numero civico
+            'beneficiario' => $this->getValue($row, 19),  // Beneficiario
+            'condizioni_pagamento' => $this->getValue($row, 20),  // Condizioni di pagamento
+            'metodo_pagamento' => $this->getValue($row, 21),  // Metodo di pagamento
+            'banca' => $this->getValue($row, 22),  // Banca
         ];
 
         // Validate required fields
         $validator = Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'vat_number' => 'nullable|string|max:13',
+            'denominazione' => 'required|string|max:255',
+            'partita_iva' => 'nullable|string|max:13',
+            'codice_fiscale' => 'nullable|string|max:16',
         ]);
 
         if ($validator->fails()) {
@@ -107,9 +144,9 @@ class ExcelImportService
                 // Create client
                 $client = Client::create([
                     'company_id' => $company->id,
-                    'name' => $data['name'],
-                    'vat_number' => $data['vat_number'],
-                    'client_type' => 'standard',  // Default type
+                    'name' => $data['denominazione'] ?? $data['codice_cliente'],
+                    'vat_number' => $data['partita_iva'],
+                    //  'client_type' => 'standard',  // Default type
                 ]);
 
                 // Create address for client if any address field is provided
@@ -126,12 +163,12 @@ class ExcelImportService
                 $this->createRegistrationsForClient($client, $data, $rowIndex);
             } else {
                 // Import as new company
-                $existingCompany = Company::where('vat_number', $data['vat_number'])
-                    ->orWhere('name', $data['name'])
+                $existingCompany = Company::where('vat_number', $data['partita_iva'])
+                    ->orWhere('name', $data['denominazione'])
                     ->first();
 
                 if ($existingCompany) {
-                    $this->errors[] = "Riga {$rowIndex}: Azienda già esistente ({$data['name']} - {$data['vat_number']})";
+                    $this->errors[] = "Riga {$rowIndex}: Azienda già esistente ({$data['denominazione']} - {$data['partita_iva']})";
                     $this->skipped++;
                     \DB::rollBack();
                     return;
@@ -139,8 +176,8 @@ class ExcelImportService
 
                 // Create company
                 $company = Company::create([
-                    'name' => $data['name'],
-                    'vat_number' => $data['vat_number'],
+                    'name' => $data['denominazione'] ?? $data['codice_cliente'],
+                    'vat_number' => $data['partita_iva'],
                     'company_type' => 'call center',  // Default type
                 ]);
 
@@ -172,7 +209,7 @@ class ExcelImportService
     {
         try {
             // Get Sede Legale address type (ID 5 from seeder)
-            $addressType = AddressType::find(5);
+            $addressType = AddressType::where('name', 'Sede Legale')->first()->where('is_person', false)->first();
             if (!$addressType) {
                 $this->errors[] = "Riga {$rowIndex}: Tipo indirizzo 'Sede Legale' non trovato";
                 return;
@@ -199,7 +236,7 @@ class ExcelImportService
     {
         try {
             // Get Sede Legale address type (ID 5 from seeder)
-            $addressType = AddressType::find(5);
+            $addressType = AddressType::where('name', 'Sede Legale')->first()->where('is_person', false)->first();
             if (!$addressType) {
                 $this->errors[] = "Riga {$rowIndex}: Tipo indirizzo 'Sede Legale' non trovato";
                 return;
@@ -225,7 +262,7 @@ class ExcelImportService
     protected function createRegistrationsForCompany(Company $company, array $data, int $rowIndex): void
     {
         $registrationTypes = [
-            'indirizzo_telematico' => 'Indirizzo Telematico',
+            'indirizzo_telematico' => 'SDI',
             'email' => 'Email',
             'pec' => 'PEC',
         ];
@@ -237,10 +274,27 @@ class ExcelImportService
         }
     }
 
+    protected function createRegistrationForCompany(Company $company, string $value, string $type, int $rowIndex): void
+    {
+        try {
+            Registration::create([
+                'registrable_type' => Company::class,
+                'registrable_id' => $company->id,
+                'company_id' => $company->id,
+                'code' => $type,
+                'value' => $value,
+                'start_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error creating registration for company {$company->id}: " . $e->getMessage());
+            $this->errors[] = "Riga {$rowIndex}: Errore creazione registrazione - " . $e->getMessage();
+        }
+    }
+
     protected function createRegistrationsForClient(Client $client, array $data, int $rowIndex): void
     {
         $registrationTypes = [
-            'indirizzo_telematico' => 'Indirizzo Telematico',
+            'SDI' => 'Indirizzo Telematico',
             'email' => 'Email',
             'pec' => 'PEC',
         ];
@@ -252,23 +306,6 @@ class ExcelImportService
         }
     }
 
-    protected function createRegistrationForCompany(Company $company, string $value, string $type, int $rowIndex): void
-    {
-        try {
-            Registration::create([
-                'registrable_type' => Company::class,
-                'registrable_id' => $company->id,
-                'company_id' => $company->id,
-                'registration_type' => $type,
-                'value' => $value,
-                'start_at' => now(),
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Error creating registration for company {$company->id}: " . $e->getMessage());
-            $this->errors[] = "Riga {$rowIndex}: Errore creazione registrazione - " . $e->getMessage();
-        }
-    }
-
     protected function createRegistrationForClient(Client $client, string $value, string $type, int $rowIndex): void
     {
         try {
@@ -276,7 +313,7 @@ class ExcelImportService
                 'registrable_type' => Client::class,
                 'registrable_id' => $client->id,
                 'company_id' => $client->company_id,
-                'registration_type' => $type,
+                'code' => $type,
                 'value' => $value,
                 'start_at' => now(),
             ]);

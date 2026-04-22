@@ -38,37 +38,37 @@ class AddressTypeSeeder extends Seeder
             ],
             [
                 'id' => 9,
-                'name' => 'Domicilio Aziendale',
+                'name' => 'Indirizzo',
                 'is_person' => false,
             ],
             [
                 'id' => 10,
-                'name' => 'Sede Legale Aziendale',
+                'name' => 'Sede Legale',
                 'is_person' => false,
             ],
             [
                 'id' => 11,
-                'name' => 'Sede Operativa Aziendale',
+                'name' => 'Sede Operativa',
                 'is_person' => false,
             ],
             [
                 'id' => 12,
-                'name' => 'Sede Amministrativa Aziendale',
+                'name' => 'Sede Amministrativa',
                 'is_person' => false,
             ],
             [
                 'id' => 13,
-                'name' => 'Sede Stabilimento Aziendale',
+                'name' => 'Sede Stabilimento',
                 'is_person' => false,
             ],
             [
                 'id' => 14,
-                'name' => 'Sede Secondaria Aziendale',
+                'name' => 'Sede Secondaria',
                 'is_person' => false,
             ],
             [
                 'id' => 15,
-                'name' => 'Sede Occasionale Aziendale',
+                'name' => 'Sede Occasionale',
                 'is_person' => false,
             ],
             [

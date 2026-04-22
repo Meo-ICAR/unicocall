@@ -20,6 +20,7 @@ class CompaniesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
                     ->sortable()
@@ -30,7 +31,7 @@ class CompaniesTable
                 TextColumn::make('company_type')
                     ->sortable()
                     ->badge(),
-                TextColumn::make('adminUser.name')
+                TextColumn::make('companyAdminUser.name')
                     ->label('Admin User')
                     ->searchable(),
                 TextColumn::make('contact_email')
@@ -58,14 +59,15 @@ class CompaniesTable
                             ->label('File Excel')
                             ->required()
                             ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
-                            ->helperText('Carica un file Excel con le aziende da importare'),
+                            ->helperText('Carica un file Excel con le aziende da importare')
+                            //      ->directory('temp')
+                            ->disk('local'),
                     ])
                     ->action(function (array $data) {
                         try {
-                            $user = Auth::user();
-                            $firstCompany = Company::first();
+                            $user = auth()->user();
 
-                            // Check if user is super admin and current company is the first company
+                            // Only allow super admin to import companies
                             if (!$user->is_super_admin) {
                                 Notification::make()
                                     ->danger()
@@ -75,9 +77,19 @@ class CompaniesTable
                                 return;
                             }
 
-                            // Store the uploaded file temporarily
-                            $filePath = $data['excel_file']->store('temp', 'local');
-                            $fullPath = storage_path('app/' . $filePath);
+                            // Check if file exists and is valid
+                            if (!isset($data['excel_file']) || empty($data['excel_file'])) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Errore File')
+                                    ->body('File non trovato o non valido.')
+                                    ->send();
+                                return;
+                            }
+
+                            // FileUpload returns a string path when using disk/directory
+                            $filePath = $data['excel_file'];
+                            $fullPath = storage_path('app/private/' . basename($filePath));
 
                             // Run the import service without companyId (imports as new companies)
                             $importService = new ExcelImportService();

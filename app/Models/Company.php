@@ -110,6 +110,14 @@ class Company extends Model
     }
 
     /**
+     * Get the admin user associated with this company
+     */
+    public function companyAdminUser()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
      * Check if company has an admin user
      */
     public function hasAdminUser(): bool

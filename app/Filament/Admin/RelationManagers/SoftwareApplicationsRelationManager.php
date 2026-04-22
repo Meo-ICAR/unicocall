@@ -25,6 +25,7 @@ class SoftwareApplicationsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return SoftwareApplicationsTable::configure($table)
+            ->defaultSort('name')
             ->headerActions([
                 Actions\CreateAction::make()
                     ->label('Nuova Applicazione'),

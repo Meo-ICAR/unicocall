@@ -182,10 +182,10 @@ class CompanyForm
                                             ->placeholder('Es. Azienda Madre Srl')
                                             ->helperText('Nome dello sponsor o azienda madre'),
                                         Select::make('user_id')
-                                            ->label('Utente Referente')
-                                            ->relationship('user', 'name')
+                                            ->relationship('companyAdminUser', 'name')
+                                            ->label('Utente Admin')
                                             ->placeholder('Seleziona utente')
-                                            ->helperText('Utente di riferimento per questa azienda')
+                                            ->helperText('Utente admin di questa azienda')
                                             ->searchable()
                                             ->preload(),
                                     ])

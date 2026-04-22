@@ -2,6 +2,11 @@
 
 namespace App\Filament\Admin\Resources\Companies;
 
+use App\Filament\Admin\RelationManagers\AddressesRelationManager;
+use App\Filament\Admin\RelationManagers\BranchesRelationManager;
+use App\Filament\Admin\RelationManagers\ClientsRelationManager;
+use App\Filament\Admin\RelationManagers\EmployeesRelationManager;
+use App\Filament\Admin\RelationManagers\RegistrationsRelationManager;
 use App\Filament\Admin\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Admin\Resources\Companies\Pages\EditCompany;
 use App\Filament\Admin\Resources\Companies\Pages\ListCompanies;
@@ -35,10 +40,11 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Admin\RelationManagers\BranchesRelationManager::class,
-            \App\Filament\Admin\RelationManagers\EmployeesRelationManager::class,
-            \App\Filament\Admin\RelationManagers\ClientsRelationManager::class,
-            \App\Filament\Admin\RelationManagers\RegistrationsRelationManager::class,
+            EmployeesRelationManager::class,
+            AddressesRelationManager::class,
+            BranchesRelationManager::class,
+            ClientsRelationManager::class,
+            RegistrationsRelationManager::class,
         ];
     }
 

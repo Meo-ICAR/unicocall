@@ -13,9 +13,10 @@ return new class extends Migration {
         Schema::create('registrations', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->string('name')->nullable()->default('IVA');
+            $table->string('name')->nullable();
             $table->string('registrable_type')->comment('Classe del Modello collegato (es. App\Models\Client)');
             $table->string('registrable_id')->comment('ID del Modello (VARCHAR 36 per supportare sia UUID che Integer)');
+            $table->string('value')->nullable();
             $table->string('code')->nullable();
             $table->string('code_internal')->nullable();
             $table->string('description')->nullable();

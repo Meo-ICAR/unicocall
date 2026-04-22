@@ -25,6 +25,7 @@ class ClientsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return ClientsTable::configure($table)
+            ->defaultSort('name')
             ->headerActions([
                 Actions\CreateAction::make()
                     ->label('Nuovo Cliente'),

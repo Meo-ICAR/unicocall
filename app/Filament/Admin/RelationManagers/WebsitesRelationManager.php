@@ -100,6 +100,7 @@ class WebsitesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')

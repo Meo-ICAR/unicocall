@@ -25,6 +25,7 @@ class BranchesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return BranchesTable::configure($table)
+            ->defaultSort('name')
             ->headerActions([
                 Actions\CreateAction::make()
                     ->label('Nuova Sede'),

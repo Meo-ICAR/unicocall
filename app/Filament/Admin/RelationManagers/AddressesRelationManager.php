@@ -32,6 +32,7 @@ class AddressesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return AddressesTable::configure($table)
+            ->defaultSort('name')
             ->headerActions([
                 Actions\CreateAction::make()
                     ->label('Nuovo Indirizzo'),

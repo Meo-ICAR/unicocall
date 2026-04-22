@@ -25,6 +25,7 @@ class EmployeesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return EmployeesTable::configure($table)
+            ->defaultSort('name')
             ->headerActions([
                 Actions\CreateAction::make()
                     ->label('Nuovo Dipendente'),
