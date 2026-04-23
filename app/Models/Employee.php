@@ -362,4 +362,20 @@ class Employee extends Model
             'ghost' => static::ghost()->count(),
         ];
     }
+
+    /**
+     * Get all subappaltis where this employee is the sub contractor
+     */
+    public function subappaltisAsSub()
+    {
+        return $this->morphMany(Subappalti::class, 'sub');
+    }
+
+    /**
+     * Get all subappaltis where this employee is the originator
+     */
+    public function subappaltisAsOriginator()
+    {
+        return $this->morphMany(Subappalti::class, 'originator');
+    }
 }

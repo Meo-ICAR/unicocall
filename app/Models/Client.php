@@ -45,6 +45,8 @@ class Client extends Model implements HasMedia
             'consent_marketing_at' => 'datetime',
             'consent_profiling_at' => 'datetime',
             'blacklist_at' => 'datetime',
+            'categorie_dati' => 'array',
+            'nomina_at' => 'datetime',
         ];
     }
 
@@ -145,5 +147,21 @@ class Client extends Model implements HasMedia
     public function getNetIvaPosition(): float
     {
         return $this->getTotalSalesIva() - $this->getTotalPurchaseIva();
+    }
+
+    /**
+     * Get all subappaltis where this client is the sub contractor
+     */
+    public function subappaltisAsSub()
+    {
+        return $this->morphMany(Subappalti::class, 'sub');
+    }
+
+    /**
+     * Get all subappaltis where this client is the originator
+     */
+    public function subappaltisAsOriginator()
+    {
+        return $this->morphMany(Subappalti::class, 'originator');
     }
 }

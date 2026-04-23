@@ -29,6 +29,19 @@ class ClientsTable
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
+                TextColumn::make('leadsource.name')
+                    ->label('Lead Source')
+                    ->searchable(),
+                TextColumn::make('servizio')
+                    ->label('Servizio')
+                    ->searchable(),
+                TextColumn::make('nomina')
+                    ->label('Nomina')
+                    ->searchable(),
+                TextColumn::make('nomina_at')
+                    ->label('Data Nomina')
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('dpo_email')
                     ->searchable(),
                 TextColumn::make('privacy_policy_url')

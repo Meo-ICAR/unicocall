@@ -49,4 +49,20 @@ class SoftwareApplication extends Model
     {
         return $this->belongsTo(SoftwareCategory::class, 'software_category_id');
     }
+
+    /**
+     * Get all subappaltis where this software application is the sub contractor
+     */
+    public function subappaltisAsSub()
+    {
+        return $this->morphMany(Subappalti::class, 'sub');
+    }
+
+    /**
+     * Get all subappaltis where this software application is the originator
+     */
+    public function subappaltisAsOriginator()
+    {
+        return $this->morphMany(Subappalti::class, 'originator');
+    }
 }

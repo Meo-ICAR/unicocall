@@ -95,6 +95,43 @@ class ClientForm
                                 TextInput::make('salary_quote')->numeric(),
                             ])
                             ->columns(3),
+                        Tabs\Tab::make('Servizi & Nomina')
+                            ->schema([
+                                TextInput::make('servizio')
+                                    ->label('Servizio')
+                                    ->placeholder('Es. Consulenza GDPR, Marketing Digitale, etc.'),
+                                Select::make('categorie_dati')
+                                    ->label('Categorie Dati')
+                                    ->multiple()
+                                    ->options([
+                                        'dati_personali' => 'Dati Personali',
+                                        'dati_sensibili' => 'Dati Sensibili',
+                                        'dati_giudiziari' => 'Dati Giudiziari',
+                                        'dati_biometrici' => 'Dati Biometrici',
+                                        'dati_genetici' => 'Dati Genetici',
+                                        'dati_sanitari' => 'Dati Sanitari',
+                                        'dati_finanziari' => 'Dati Finanziari',
+                                        'dati_anagrafici' => 'Dati Anagrafici',
+                                        'dati_contatto' => 'Dati di Contatto',
+                                        'dati_comportamentali' => 'Dati Comportamentali',
+                                        'dati_geolocalizzazione' => 'Dati Geolocalizzazione',
+                                        'dati_professionali' => 'Dati Professionali',
+                                    ])
+                                    ->placeholder('Seleziona le categorie di dati trattate'),
+                                TextInput::make('nomina')
+                                    ->label('Nomina')
+                                    ->placeholder('Es. DPO, Amministratore di Sistema, etc.'),
+                                DateTimePicker::make('nomina_at')
+                                    ->label('Data Nomina')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->placeholder('Seleziona data e ora della nomina'),
+                                Textarea::make('istruzioni')
+                                    ->label('Istruzioni Operative')
+                                    ->placeholder('Inserisci le istruzioni operative per il trattamento dei dati')
+                                    ->rows(4)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
                     ])
                     ->columnSpanFull(),
             ]);
