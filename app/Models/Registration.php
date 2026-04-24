@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Wildside\Userstamps\HasUserstamps;
 
 class Registration extends Model
 {
@@ -55,5 +54,14 @@ class Registration extends Model
     public function scopeForCompany($query, $companyId)
     {
         return $query->where('company_id', $companyId);
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($registration) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $registration->company_id = auth()->user()->current_company_id;
+            }
+        });
     }
 }

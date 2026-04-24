@@ -180,4 +180,13 @@ class PurchaseInvoice extends Model
             'data_pagamento' => now(),
         ]);
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($purchaseInvoice) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $purchaseInvoice->company_id = auth()->user()->current_company_id;
+            }
+        });
+    }
 }

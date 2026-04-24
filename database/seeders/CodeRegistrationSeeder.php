@@ -15,75 +15,72 @@ class CodeRegistrationSeeder extends Seeder
     public function run(): void
     {
         try {
-            // Clear existing records using Eloquent model
-            CodeRegistration::query()->delete();
+            // Clear existing records including soft deletes
+            CodeRegistration::query()->forceDelete();
 
             $codes = [
                 [
                     'code' => 'COGE',
                     'name' => 'Conto Contabilità',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Client',
                 ],
                 [
                     'code' => 'SDI',
                     'name' => 'Sistema di Interscambio',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Company',
                 ],
                 [
                     'code' => 'IVA',
                     'name' => 'Partita IVA',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Client',
-                ],
-                [
-                    'code' => 'SDI',
-                    'name' => 'Sistema di Interscambio',
-                    'is_mandatory' => false
-                    'codeable_type' => 'App\Models\Company',
                 ],
                 [
                     'code' => 'IBAN',
                     'name' => 'Estremi conto corrente',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Client',
                 ],
                 [
-                    'code' => 'OAM',
+                    'code' => 'OAM_CLIENT',
                     'name' => 'Organismo di Agenti e Mediatori',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Client',
                 ],
                 [
-                    'code' => 'OAM',
+                    'code' => 'OAM_COMPANY',
                     'name' => 'Organismo di Agenti e Mediatori',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Company',
                 ],
                 [
-                    'code' => 'IVASS',
+                    'code' => 'IVASS_CLIENT',
                     'name' => 'Istituto per la vigilanza sulle assicurazioni',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Client',
                 ],
                 [
-                    'code' => 'IVASS',
+                    'code' => 'IVASS_COMPANY',
                     'name' => 'Istituto per la vigilanza sulle assicurazioni',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Company',
                 ],
                 [
                     'code' => 'ISO27001',
                     'name' => 'ISO 27001',
-                    'is_mandatory' => false
+                    'is_mandatory' => false,
                     'codeable_type' => 'App\Models\Client',
                 ],
             ];
 
             foreach ($codes as $codeData) {
-                CodeRegistration::create($codeData);
-                $this->command->info("Created code registration: {$codeData['code']} - {$codeData['name']}");
+                $code = CodeRegistration::firstOrCreate(
+                    ['code' => $codeData['code']],
+                    $codeData
+                );
+                $this->command->info("Processed code registration: {$codeData['code']} - {$codeData['name']}");
             }
 
             $this->command->info('CodeRegistration seeder completed successfully!');

@@ -5,14 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Client extends Model implements HasMedia
 {
-    use InteractsWithMedia, LogsActivity;
+    use InteractsWithMedia;
 
     protected $guarded = [];
 
@@ -47,14 +45,8 @@ class Client extends Model implements HasMedia
             'blacklist_at' => 'datetime',
             'categorie_dati' => 'array',
             'nomina_at' => 'datetime',
+            'documents' => 'array',
         ];
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logUnguarded()
-            ->logOnlyDirty();
     }
 
     public function company(): BelongsTo
@@ -163,5 +155,36 @@ class Client extends Model implements HasMedia
     public function subappaltisAsOriginator()
     {
         return $this->morphMany(Subappalti::class, 'originator');
+    }
+
+    /**
+     * Get all subappaltis where this client is the originator and sub is also a client
+     */
+    public function subappaltiClientToClient()
+    {
+        return $this
+            ->morphMany(Subappalti::class, 'originator')
+            ->where('originator_type', 'client')
+            ->where('sub_type', 'client');
+    }
+
+    /**
+     * Get all subappaltis where this client is the originator and sub is an employee
+     */
+    public function subappaltiClientToEmployee()
+    {
+        return $this
+            ->morphMany(Subappalti::class, 'originator')
+            ->where('originator_type', 'client')
+            ->where('sub_type', 'employee');
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($client) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $client->company_id = auth()->user()->current_company_id;
+            }
+        });
     }
 }

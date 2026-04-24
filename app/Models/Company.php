@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Wildside\Userstamps\HasUserstamps;
 
 class Company extends Model
 {
@@ -190,6 +189,11 @@ class Company extends Model
     public function addresses(): MorphMany
     {
         return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function registroTrattamentiItems(): HasMany
+    {
+        return $this->hasMany(RegistroTrattamentiItem::class);
     }
 
     public function getMainAddressAttribute(): ?Address

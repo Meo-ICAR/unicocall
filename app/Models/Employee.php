@@ -7,19 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-// use Wildside\Userstamps\HasUserstamps;
 
 class Employee extends Model
 {
-    use HasFactory, SoftDeletes;  // , HasUserstamps;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'company_id',
         'company_branch_id',
         'user_id',
         'coordinated_by_id',
-        'first_name',
-        'last_name',
+        'name',
         'email',
         'phone',
         'fiscal_code',
@@ -138,16 +136,7 @@ class Employee extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Accessors
-    public function getFullNameAttribute(): string
-    {
-        return trim($this->first_name . ' ' . $this->last_name);
-    }
-
-    public function getFullNameReverseAttribute(): string
-    {
-        return trim($this->last_name . ' ' . $this->first_name);
-    }
+    // Accessors - Note: employees table only has 'name' field, not first_name/last_name
 
     public function getIsActiveAttribute(): bool
     {
@@ -377,5 +366,14 @@ class Employee extends Model
     public function subappaltisAsOriginator()
     {
         return $this->morphMany(Subappalti::class, 'originator');
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($employee) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $employee->company_id = auth()->user()->current_company_id;
+            }
+        });
     }
 }

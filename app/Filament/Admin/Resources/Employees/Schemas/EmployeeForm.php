@@ -162,7 +162,10 @@ class EmployeeForm
                                             ->helperText('Sede dove il dipendente lavora'),
                                         Select::make('coordinated_by_id')
                                             ->label('Supervisore Diretto')
-                                            ->relationship('supervisor', 'full_name')
+                                            ->relationship('supervisor', 'name')
+                                            ->getOptionLabelUsing(function ($record) {
+                                                return $record->name;
+                                            })
                                             ->placeholder('Seleziona supervisore')
                                             ->helperText('Manager a cui riporta il dipendente'),
                                         Toggle::make('is_supervisor')

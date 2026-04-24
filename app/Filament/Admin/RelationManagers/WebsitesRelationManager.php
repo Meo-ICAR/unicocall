@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\RelationManagers;
+namespace App\Filament\Admin\RelationManagers;
 
-use App\Models\COMPILANCE\Website;
+use App\Models\Website;
 // use App\Services\TransparencyScanService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;

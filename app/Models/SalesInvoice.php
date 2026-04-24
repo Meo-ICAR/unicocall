@@ -159,4 +159,13 @@ class SalesInvoice extends Model
         }
         return 0;
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($salesInvoice) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $salesInvoice->company_id = auth()->user()->current_company_id;
+            }
+        });
+    }
 }

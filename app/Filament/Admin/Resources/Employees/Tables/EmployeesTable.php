@@ -2,12 +2,18 @@
 
 namespace App\Filament\Admin\Resources\Employees\Tables;
 
+use App\Notifications\EmployeeImportNotification;
+use App\Services\EmployeeImportService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeesTable
 {
@@ -89,9 +95,52 @@ class EmployeesTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                Action::make('import_employees')
+                    ->label('Importa Dipendenti')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->form([
+                        FileUpload::make('file')
+                            ->label('Seleziona file Excel')
+                            ->required()
+                            ->acceptedFileTypes(['xlsx', 'xls'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('imports')
+                            ->helperText('Seleziona un file Excel (.xlsx o .xls) contenente i dati dei dipendenti')
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = Storage::disk('local')->path($data['file']);
+
+                            $importService = new EmployeeImportService();
+                            $results = $importService->importFromFile($filePath);
+
+                            // Delete the temporary file
+                            Storage::disk('local')->delete($data['file']);
+
+                            // Send notification
+                            Notification::route('notifications', auth()->user())
+                                ->notify(new EmployeeImportNotification($results));
+
+                            if (!empty($results['errors'])) {
+                                Notification::route('notifications', auth()->user())
+                                    ->error('Errori Importazione', implode("\n", $results['errors']));
+                            }
+                        } catch (\Exception $e) {
+                            Notification::route('notifications', auth()->user())
+                                ->error('Errore Importazione', $e->getMessage());
+
+                            // Delete the temporary file even on error
+                            if (isset($data['file'])) {
+                                Storage::disk('local')->delete($data['file']);
+                            }
+                        }
+                    })
+            ])
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])
             ]);
     }
 }

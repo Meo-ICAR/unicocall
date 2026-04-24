@@ -7,6 +7,7 @@ use App\Filament\Admin\RelationManagers\BranchesRelationManager;
 use App\Filament\Admin\RelationManagers\ClientsRelationManager;
 use App\Filament\Admin\RelationManagers\EmployeesRelationManager;
 use App\Filament\Admin\RelationManagers\RegistrationsRelationManager;
+use App\Filament\Admin\RelationManagers\RegistroTrattamentiItemRelationManager;
 use App\Filament\Admin\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Admin\Resources\Companies\Pages\EditCompany;
 use App\Filament\Admin\Resources\Companies\Pages\ListCompanies;
@@ -45,6 +46,7 @@ class CompanyResource extends Resource
             BranchesRelationManager::class,
             ClientsRelationManager::class,
             RegistrationsRelationManager::class,
+            RegistroTrattamentiItemRelationManager::class,
         ];
     }
 

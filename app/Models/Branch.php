@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-// use Wildside\Userstamps\HasUserstamps;
 
 class Branch extends Model
 {
-    use HasFactory, SoftDeletes;  // , HasUserstamps;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'company_id',
@@ -158,5 +157,14 @@ class Branch extends Model
     public static function getOfficesByProvince(string $province): \Illuminate\Database\Eloquent\Collection
     {
         return static::where('province', $province)->get();
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($branch) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $branch->company_id = auth()->user()->current_company_id;
+            }
+        });
     }
 }

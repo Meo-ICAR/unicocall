@@ -2,12 +2,18 @@
 
 namespace App\Filament\Admin\Resources\Clients\Schemas;
 
+use App\Models\PrivacyDataType;
+use App\Models\PrivacyLegalBasis;
+use App\Models\PrivacySecurity;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
@@ -20,88 +26,370 @@ class ClientForm
                 Tabs::make('ClientDetails')
                     ->tabs([
                         Tabs\Tab::make('Dati Anagrafici')
+                            ->icon('heroicon-o-user')
                             ->schema([
                                 TextInput::make('name')
-                                    ->required(),
-                                Toggle::make('is_person')->default(true)->live(),
-                                TextInput::make('first_name')->visible(fn(Get $get): bool => $get('is_person'))->required(),
-                                TextInput::make('tax_code')->visible(fn(Get $get): bool => $get('is_person'))->required(),
-                                TextInput::make('vat_number')->visible(fn(Get $get): bool => !$get('is_person'))->required(),
-                                Select::make('client_type_id')
-                                    ->relationship('clientType', 'name'),
-                                TextInput::make('email')
-                                    ->label('Email address')
-                                    ->email(),
-                                TextInput::make('phone')
-                                    ->tel(),
-                                Select::make('leadsource_id')
-                                    ->relationship('leadsource', 'name'),
-                                TextInput::make('status')
+                                    ->label(fn(Get $get): string => $get('is_person') ? 'Cognome' : 'Ragione Sociale')
                                     ->required()
-                                    ->default('raccolta_dati'),
-                                DateTimePicker::make('acquired_at'),
-                                DateTimePicker::make('contract_signed_at'),
+                                    ->maxLength(255)
+                                    ->placeholder(fn(Get $get): string => $get('is_person') ? 'Es. Rossi' : 'Es. Mario Rossi Srl')
+                                    ->columnSpanFull(),
+                                Toggle::make('is_person')
+                                    ->label('Persona Fisica')
+                                    ->default(true)
+                                    ->live()
+                                    ->helperText('Seleziona se si tratta di una persona fisica o giuridica')
+                                    ->columnSpanFull(),
+                                // Prima riga: Nome/Codice Fiscale
+                                TextInput::make('first_name')
+                                    ->label('Nome')
+                                    ->visible(fn(Get $get): bool => $get('is_person'))
+                                    ->required(fn(Get $get): bool => $get('is_person'))
+                                    ->maxLength(255)
+                                    ->placeholder('Es. Mario'),
+                                TextInput::make('tax_code')
+                                    ->label('Codice Fiscale')
+                                    ->visible(fn(Get $get): bool => $get('is_person'))
+                                    ->required(fn(Get $get): bool => $get('is_person'))
+                                    ->maxLength(16)
+                                    ->placeholder('Es. RSSMRA85M10A562S')
+                                    ->helperText('16 caratteri alfanumerici'),
+                                // Seconda riga: Partita IVA
+                                TextInput::make('vat_number')
+                                    ->label('Partita IVA')
+                                    ->visible(fn(Get $get): bool => !$get('is_person'))
+                                    ->required(fn(Get $get): bool => !$get('is_person'))
+                                    ->maxLength(11)
+                                    ->placeholder('Es. 12345678901')
+                                    ->helperText('11 caratteri numerici')
+                                    ->columnSpan(2),
+                                // Terza riga: Tipo Cliente e Origine
+                                Select::make('client_type_id')
+                                    ->label('Tipo Cliente')
+                                    ->relationship('clientType', 'name')
+                                    ->searchable()
+                                    ->placeholder('Seleziona tipo cliente'),
+                                Select::make('leadsource_id')
+                                    ->label('Origine Lead')
+                                    ->relationship('leadsource', 'name')
+                                    ->searchable()
+                                    ->placeholder('Seleziona origine'),
+                                // Quarta riga: Email e Telefono
+                                TextInput::make('email')
+                                    ->label('Email')
+                                    ->email()
+                                    ->maxLength(255)
+                                    ->placeholder('esempio@domain.com'),
+                                TextInput::make('phone')
+                                    ->label('Telefono')
+                                    ->tel()
+                                    ->maxLength(20)
+                                    ->placeholder('Es. +39 333 1234567'),
+                                // Quinta riga: Stato e Date
+                                Select::make('status')
+                                    ->label('Stato')
+                                    ->required()
+                                    ->options([
+                                        'raccolta_dati' => 'Raccolta Dati',
+                                        'contatto_iniziale' => 'Contatto Iniziale',
+                                        'in_lavorazione' => 'In Lavorazione',
+                                        'proposta_inviata' => 'Proposta Inviata',
+                                        'negoziazione' => 'Negoziazione',
+                                        'cliente_attivo' => 'Cliente Attivo',
+                                        'cliente_perduto' => 'Cliente Perduto',
+                                        'archiviato' => 'Archiviato',
+                                    ])
+                                    ->default('raccolta_dati')
+                                    ->helperText('Stato attuale del cliente'),
+                                DateTimePicker::make('acquired_at')
+                                    ->label('Data Acquisizione')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->placeholder('Data di acquisizione'),
+                                DateTimePicker::make('contract_signed_at')
+                                    ->label('Data Contratto')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->placeholder('Data firma contratto'),
                             ])
                             ->columns(2),
                         Tabs\Tab::make('Privacy & Consensi')
+                            ->icon('heroicon-o-shield-check')
                             ->schema([
-                                Toggle::make('privacy_consent')->required(),
-                                DateTimePicker::make('general_consent_at'),
-                                DateTimePicker::make('privacy_policy_read_at'),
-                                DateTimePicker::make('consent_special_categories_at'),
-                                DateTimePicker::make('consent_sic_at'),
-                                DateTimePicker::make('consent_marketing_at'),
-                                DateTimePicker::make('consent_profiling_at'),
-                                TextInput::make('privacy_contact_email')->email(),
-                                TextInput::make('dpo_email')->email(),
-                                TextInput::make('privacy_role'),
-                                Textarea::make('purpose')->columnSpanFull(),
-                                Textarea::make('data_subjects')->columnSpanFull(),
-                                Textarea::make('data_categories')->columnSpanFull(),
-                                TextInput::make('retention_period'),
-                                TextInput::make('extra_eu_transfer'),
-                                Textarea::make('security_measures')->columnSpanFull(),
+                                // Prima riga: Consensi principali
+                                Toggle::make('privacy_consent')
+                                    ->label('Consenso Trattamento Dati')
+                                    ->required()
+                                    ->helperText('Consenso al trattamento dei dati personali'),
+                                Toggle::make('is_approved')
+                                    ->label('Approvato')
+                                    ->default(true)
+                                    ->helperText('Stato approvazione del cliente'),
+                                // Titolo Date Consensi
+                                Placeholder::make('consensi_title')
+                                    ->label('Date Consensi')
+                                    ->content('Registrazione temporale dei consensi')
+                                    ->columnSpanFull(),
+                                // Date Consensi - prima riga
+                                DateTimePicker::make('general_consent_at')
+                                    ->label('Consenso Generale')
+                                    ->displayFormat('d/m/Y H:i'),
+                                DateTimePicker::make('privacy_policy_read_at')
+                                    ->label('Lettura Privacy Policy')
+                                    ->displayFormat('d/m/Y H:i'),
+                                DateTimePicker::make('consent_special_categories_at')
+                                    ->label('Categorie Speciali')
+                                    ->displayFormat('d/m/Y H:i'),
+                                // Date Consensi - seconda riga
+                                DateTimePicker::make('consent_sic_at')
+                                    ->label('Sicurezza')
+                                    ->displayFormat('d/m/Y H:i'),
+                                DateTimePicker::make('consent_marketing_at')
+                                    ->label('Marketing')
+                                    ->displayFormat('d/m/Y H:i'),
+                                DateTimePicker::make('consent_profiling_at')
+                                    ->label('Profilazione')
+                                    ->displayFormat('d/m/Y H:i'),
+                                // Titolo Responsabili Privacy
+                                Placeholder::make('responsabili_title')
+                                    ->label('Responsabili Privacy')
+                                    ->content('Gestione responsabili privacy')
+                                    ->columnSpanFull(),
+                                // Responsabili Privacy
+                                TextInput::make('privacy_contact_email')
+                                    ->label('Email Contatto Privacy')
+                                    ->email()
+                                    ->placeholder('privacy@azienda.com'),
+                                TextInput::make('dpo_email')
+                                    ->label('Email DPO')
+                                    ->email()
+                                    ->placeholder('dpo@azienda.com'),
+                                TextInput::make('privacy_role')
+                                    ->label('Ruolo Privacy')
+                                    ->placeholder('Es. Data Protection Officer'),
+                                // Titolo Dettagli Trattamento
+                                Placeholder::make('trattamento_title')
+                                    ->label('Dettagli Trattamento')
+                                    ->content('Informazioni sul trattamento dei dati')
+                                    ->columnSpanFull(),
+                                // Base Giuridica e Categorie Dati
+                                Select::make('legal_basis')
+                                    ->label('Base Giuridica')
+                                    ->options(PrivacyLegalBasis::pluck('description', 'name')->toArray())
+                                    ->placeholder('Seleziona base giuridica')
+                                    ->helperText('Base giuridica del trattamento'),
+                                Select::make('data_categories')
+                                    ->label('Categorie Dati')
+                                    ->multiple()
+                                    ->options(PrivacyDataType::getGroupedByCategory())
+                                    ->searchable()
+                                    ->getSearchResultsUsing(function (string $search) {
+                                        return PrivacyDataType::search($search)
+                                            ->limit(50)
+                                            ->pluck('name', 'slug')
+                                            ->toArray();
+                                    })
+                                    ->getOptionLabelUsing(function (string $value) {
+                                        $dataType = PrivacyDataType::findBySlug($value);
+                                        return $dataType ? "[{$dataType->category_label}] {$dataType->name}" : $value;
+                                    })
+                                    ->placeholder('Seleziona categorie dati'),
+                                // Finalità e Soggetti
+                                Textarea::make('purpose')
+                                    ->label('Finalità del Trattamento')
+                                    ->rows(3)
+                                    ->placeholder('Descrivi le finalità del trattamento dei dati')
+                                    ->columnSpanFull(),
+                                Textarea::make('data_subjects')
+                                    ->label('Soggetti Interessati')
+                                    ->rows(2)
+                                    ->placeholder('Descrivi i soggetti interessati dal trattamento')
+                                    ->columnSpanFull(),
+                                // Conservazione e Trasferimento
+                                TextInput::make('retention_period')
+                                    ->label('Periodo Conservazione')
+                                    ->placeholder('Es. 10 anni, fino alla cessazione, etc.')
+                                    ->helperText('Periodo di conservazione dei dati'),
+                                TextInput::make('extra_eu_transfer')
+                                    ->label('Trasferimento Extra-UE')
+                                    ->placeholder('Paese/Regione')
+                                    ->helperText('Indica se ci sono trasferimenti fuori UE'),
+                                // Misure di Sicurezza
+                                Textarea::make('Sicurezza')
+                                    ->label('Misure di Sicurezza')
+                                    ->rows(3)
+                                    ->placeholder('Descrivi le misure tecniche e organizzative adottate')
+                                    ->helperText('Inserisci manualmente la descrizione dettagliata delle misure di sicurezza implementate')
+                                    ->columnSpanFull(),
+                                Select::make('misure_sicurezza_predefinite')
+                                    ->label('Misure di Sicurezza Predefinite')
+                                    ->multiple()
+                                    ->options(PrivacySecurity::all()->mapWithKeys(function ($measure) {
+                                        return [$measure->id => "[{$measure->getTypeLabel()}] {$measure->name}"];
+                                    })->toArray())
+                                    ->searchable()
+                                    ->getSearchResultsUsing(function (string $search) {
+                                        return PrivacySecurity::where('name', 'like', "%{$search}%")
+                                            ->orWhere('description', 'like', "%{$search}%")
+                                            ->limit(50)
+                                            ->get()
+                                            ->mapWithKeys(function ($measure) {
+                                                return [$measure->id => "[{$measure->getTypeLabel()}] {$measure->name}"];
+                                            })
+                                            ->toArray();
+                                    })
+                                    ->getOptionLabelUsing(function ($value) {
+                                        $measure = PrivacySecurity::find($value);
+                                        return $measure ? "[{$measure->getTypeLabel()}] {$measure->name}" : $value;
+                                    })
+                                    ->placeholder('Seleziona misure predefinite (opzionale)')
+                                    ->helperText('Seleziona misure standard come riferimento o integrazione')
+                                    ->columnSpanFull(),
                             ])
                             ->columns(2),
                         Tabs\Tab::make('Documenti')
+                            ->icon('heroicon-o-document-text')
                             ->schema([
-                                SpatieMediaLibraryFileUpload::make('documents')
-                                    ->collection('documents')
+                                Placeholder::make('docs_title')
+                                    ->label('Documentazione Cliente')
+                                    ->content('Carica documenti relativi al cliente')
+                                    ->columnSpanFull(),
+                                FileUpload::make('documents')
+                                    ->label('Documenti')
                                     ->multiple()
                                     ->reorderable()
+                                    ->directory('client-documents')
+                                    ->visibility('private')
                                     ->openable()
+                                    ->maxSize(10240) // 10MB
+                                    ->acceptedFileTypes(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
+                                    ->helperText('Carica documenti come contratti, documenti identità, consensi, etc.')
+                                    ->columnSpanFull(),
+                                Placeholder::make('privacy_docs_title')
+                                    ->label('Documenti Privacy')
+                                    ->content('Documentazione specifica privacy')
+                                    ->columnSpanFull(),
+                                Repeater::make('privacy_documents')
+                                    ->label('Documenti Privacy')
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->label('Nome Documento')
+                                            ->required()
+                                            ->placeholder('Es. Modulo Consenso, Informativa Privacy, etc.'),
+                                        FileUpload::make('file')
+                                            ->label('File')
+                                            ->required()
+                                            ->directory('privacy-documents')
+                                            ->visibility('private')
+                                            ->acceptedFileTypes(['pdf', 'doc', 'docx'])
+                                            ->maxSize(5120), // 5MB
+                                        DateTimePicker::make('signed_at')
+                                            ->label('Data Firma')
+                                            ->displayFormat('d/m/Y H:i')
+                                            ->placeholder('Data di firma del documento'),
+                                    ])
+                                    ->columns(3)
+                                    ->collapsible()
+                                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
                                     ->columnSpanFull(),
                             ]),
                         Tabs\Tab::make('Avanzate & Audit')
+                            ->icon('heroicon-o-cog-6-tooth')
                             ->schema([
-                                Toggle::make('is_company_consultant')->default(false),
-                                Toggle::make('is_lead')->default(false),
-                                Toggle::make('is_structure')->default(false),
-                                Toggle::make('is_regulatory')->default(false),
-                                Toggle::make('is_ghost')->default(false),
-                                Toggle::make('is_sales')->default(true),
-                                Toggle::make('is_pep')->default(false),
-                                Toggle::make('is_sanctioned')->default(false),
-                                Toggle::make('is_remote_interaction')->default(false),
-                                Toggle::make('is_requiredApprovation')->default(false),
-                                Toggle::make('is_approved')->default(true),
-                                Toggle::make('is_anonymous')->default(false),
-                                Toggle::make('is_client')->default(true),
-                                Toggle::make('is_consultant_gdpr')->default(false),
-                                Toggle::make('is_art108')->default(false),
-                                DateTimePicker::make('blacklist_at'),
-                                TextInput::make('blacklisted_by'),
-                                TextInput::make('salary')->numeric(),
-                                TextInput::make('salary_quote')->numeric(),
+                                Placeholder::make('classificazione_title')
+                                    ->label('Classificazione Cliente')
+                                    ->content('Tipologie e classificazione del cliente')
+                                    ->columnSpanFull(),
+                                // Prima riga - Classificazione
+                                Toggle::make('is_company_consultant')
+                                    ->label('Consultant Azienda')
+                                    ->default(false),
+                                Toggle::make('is_lead')
+                                    ->label('Lead')
+                                    ->default(false),
+                                Toggle::make('is_structure')
+                                    ->label('Struttura')
+                                    ->default(false),
+                                // Seconda riga - Classificazione
+                                Toggle::make('is_regulatory')
+                                    ->label('Regolamentato')
+                                    ->default(false),
+                                Toggle::make('is_ghost')
+                                    ->label('Ghost')
+                                    ->default(false),
+                                Toggle::make('is_sales')
+                                    ->label('Vendite')
+                                    ->default(true),
+                                Placeholder::make('compliance_title')
+                                    ->label('Compliance e Risk')
+                                    ->content('Controlli di compliance e gestione rischi')
+                                    ->columnSpanFull(),
+                                // Prima riga - Compliance
+                                Toggle::make('is_pep')
+                                    ->label('PEP')
+                                    ->default(false)
+                                    ->helperText('Politically Exposed Person'),
+                                Toggle::make('is_sanctioned')
+                                    ->label('Sanzionato')
+                                    ->default(false)
+                                    ->helperText('Soggetto sanzionato'),
+                                Toggle::make('is_remote_interaction')
+                                    ->label('Interazione Remota')
+                                    ->default(false),
+                                // Seconda riga - Compliance
+                                Toggle::make('is_requiredApprovation')
+                                    ->label('Richiede Approvazione')
+                                    ->default(false),
+                                Toggle::make('is_anonymous')
+                                    ->label('Anonimo')
+                                    ->default(false),
+                                Toggle::make('is_consultant_gdpr')
+                                    ->label('Consultant GDPR')
+                                    ->default(false),
+                                Toggle::make('is_art108')
+                                    ->label('Art. 108')
+                                    ->default(false)
+                                    ->helperText('Soggetto a Art. 108 Privacy'),
+                                Placeholder::make('blacklist_title')
+                                    ->label('Gestione Blacklist')
+                                    ->content('Informazioni blacklist')
+                                    ->columnSpanFull(),
+                                // Blacklist
+                                DateTimePicker::make('blacklist_at')
+                                    ->label('Data Blacklist')
+                                    ->displayFormat('d/m/Y H:i'),
+                                TextInput::make('blacklisted_by')
+                                    ->label('Blacklistato da')
+                                    ->placeholder('Nome utente o responsabile'),
+                                Placeholder::make('economiche_title')
+                                    ->label('Informazioni Economiche')
+                                    ->content('Dati economici del cliente')
+                                    ->columnSpanFull(),
+                                // Economiche
+                                TextInput::make('salary')
+                                    ->label('Stipendio/Retribuzione')
+                                    ->numeric()
+                                    ->prefix('€')
+                                    ->placeholder('0.00'),
+                                TextInput::make('salary_quote')
+                                    ->label('Quota Stipendio')
+                                    ->numeric()
+                                    ->prefix('€')
+                                    ->placeholder('0.00'),
                             ])
-                            ->columns(3),
+                            ->columns(2),
                         Tabs\Tab::make('Servizi & Nomina')
+                            ->icon('heroicon-o-briefcase')
                             ->schema([
+                                Placeholder::make('servizi_title')
+                                    ->label('Servizi Offerti')
+                                    ->content('Servizi principali offerti al cliente')
+                                    ->columnSpanFull(),
+                                // Servizi
                                 TextInput::make('servizio')
-                                    ->label('Servizio')
-                                    ->placeholder('Es. Consulenza GDPR, Marketing Digitale, etc.'),
+                                    ->label('Servizio Principale')
+                                    ->placeholder('Es. Consulenza GDPR, Marketing Digitale, etc.')
+                                    ->helperText('Servizio principale offerto al cliente'),
                                 Select::make('categorie_dati')
-                                    ->label('Categorie Dati')
+                                    ->label('Categorie Dati Trattate')
                                     ->multiple()
                                     ->options([
                                         'dati_personali' => 'Dati Personali',
@@ -117,10 +405,17 @@ class ClientForm
                                         'dati_geolocalizzazione' => 'Dati Geolocalizzazione',
                                         'dati_professionali' => 'Dati Professionali',
                                     ])
-                                    ->placeholder('Seleziona le categorie di dati trattate'),
+                                    ->placeholder('Seleziona le categorie di dati trattate')
+                                    ->helperText('Categorie di dati trattate per questo cliente'),
+                                Placeholder::make('nomina_title')
+                                    ->label('Nomina e Ruoli')
+                                    ->content('Informazioni sulla nomina e ruoli del cliente')
+                                    ->columnSpanFull(),
+                                // Nomina e Ruoli
                                 TextInput::make('nomina')
-                                    ->label('Nomina')
-                                    ->placeholder('Es. DPO, Amministratore di Sistema, etc.'),
+                                    ->label('Ruolo/Nomina')
+                                    ->placeholder('Es. DPO, Amministratore di Sistema, etc.')
+                                    ->helperText('Ruolo specifico ricoperto dal cliente'),
                                 DateTimePicker::make('nomina_at')
                                     ->label('Data Nomina')
                                     ->displayFormat('d/m/Y H:i')
@@ -129,6 +424,7 @@ class ClientForm
                                     ->label('Istruzioni Operative')
                                     ->placeholder('Inserisci le istruzioni operative per il trattamento dei dati')
                                     ->rows(4)
+                                    ->helperText('Istruzioni specifiche per il trattamento dei dati di questo cliente')
                                     ->columnSpanFull(),
                             ])
                             ->columns(2),

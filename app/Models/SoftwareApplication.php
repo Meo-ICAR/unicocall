@@ -65,4 +65,13 @@ class SoftwareApplication extends Model
     {
         return $this->morphMany(Subappalti::class, 'originator');
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($softwareApplication) {
+            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
+                $softwareApplication->company_id = auth()->user()->current_company_id;
+            }
+        });
+    }
 }

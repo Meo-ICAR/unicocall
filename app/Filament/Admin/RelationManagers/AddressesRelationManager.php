@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\RelationManagers;
+namespace App\Filament\Admin\RelationManagers;
 
 use App\Filament\Resources\Addresses\Schemas\AddressForm;
 use App\Filament\Resources\Addresses\Tables\AddressesTable;

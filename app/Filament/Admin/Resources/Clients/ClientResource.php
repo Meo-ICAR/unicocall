@@ -2,17 +2,19 @@
 
 namespace App\Filament\Admin\Resources\Clients;
 
+use App\Filament\Admin\RelationManagers\SubappaltiClientToClientRelationManager;
+use App\Filament\Admin\RelationManagers\SubappaltiClientToEmployeeRelationManager;
 use App\Filament\Admin\Resources\Clients\Pages\CreateClient;
 use App\Filament\Admin\Resources\Clients\Pages\EditClient;
 use App\Filament\Admin\Resources\Clients\Pages\ListClients;
 use App\Filament\Admin\Resources\Clients\Schemas\ClientForm;
 use App\Filament\Admin\Resources\Clients\Tables\ClientsTable;
 use App\Models\Client;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class ClientResource extends Resource
 {
@@ -33,7 +35,8 @@ class ClientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SubappaltiClientToClientRelationManager::class,
+            SubappaltiClientToEmployeeRelationManager::class,
         ];
     }
 

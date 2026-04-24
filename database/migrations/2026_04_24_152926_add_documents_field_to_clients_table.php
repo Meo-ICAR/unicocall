@@ -10,12 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('client_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('description')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+        Schema::table('clients', function (Blueprint $table) {
+            $table->json('documents')->nullable()->after('istruzioni')->comment('Documents uploaded for client');
         });
     }
 
@@ -24,6 +20,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('client_types');
+        Schema::table('clients', function (Blueprint $table) {
+            $table->dropColumn('documents');
+        });
     }
 };
