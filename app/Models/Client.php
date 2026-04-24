@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Traits\HasPrivacySuggestions;
 
 class Client extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasPrivacySuggestions;
 
     protected $guarded = [];
 
