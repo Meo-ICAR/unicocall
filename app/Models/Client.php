@@ -46,6 +46,7 @@ class Client extends Model implements HasMedia
             'categorie_dati' => 'array',
             'nomina_at' => 'datetime',
             'documents' => 'array',
+            'company_type' => 'string',
         ];
     }
 

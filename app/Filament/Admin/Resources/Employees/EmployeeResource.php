@@ -8,17 +8,19 @@ use App\Filament\Admin\Resources\Employees\Pages\ListEmployees;
 use App\Filament\Admin\Resources\Employees\Schemas\EmployeeForm;
 use App\Filament\Admin\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {

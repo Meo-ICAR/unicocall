@@ -28,6 +28,8 @@ class CompanyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Schema $schema): Schema
     {
         return CompanyForm::configure($schema);
@@ -41,12 +43,14 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            EmployeesRelationManager::class,
-            AddressesRelationManager::class,
-            BranchesRelationManager::class,
-            ClientsRelationManager::class,
-            RegistrationsRelationManager::class,
-            RegistroTrattamentiItemRelationManager::class,
+            SoftwareApplicationsRelationManager::class,  // applicazioni software
+            WebsitesRelationManager::class,  // siti web
+            BranchesRelationManager::class,  // sedi
+            EmployeesRelationManager::class,  // incaricati del trattamento
+            ClientsRelationManager::class,  //   responsabili del trattamento
+            RegistroTrattamentiItemRelationManager::class,  // registro trattamenti
+            RegistrationsRelationManager::class,  // altri codici es OAM
+            AddressesRelationManager::class,  // indirizzi
         ];
     }
 

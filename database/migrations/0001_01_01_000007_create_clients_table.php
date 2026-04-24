@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -20,6 +19,7 @@ return new class extends Migration
             $table->string('vat_number', 20)->nullable();
             $table->string('email')->nullable();
             $table->string('dpo_email')->nullable();
+            $table->string('company_type')->nullable();
             $table->string('privacy_policy_url')->nullable();
             $table->timestamp('contract_signed_at')->nullable();
             $table->string('phone', 50)->nullable();
@@ -57,8 +57,17 @@ return new class extends Migration
             $table->text('security_measures')->nullable();
             $table->string('privacy_data')->nullable();
             $table->foreignId('client_type_id')->nullable()->constrained('client_types')->nullOnDelete();
+
             $table->boolean('privacy_consent')->default(0);
             $table->text('subfornitori')->nullable();
+
+            $table->string('servizio')->nullable();
+            $table->json('categorie_dati')->nullable();
+            $table->string('nomina')->nullable();
+            $table->timestamp('nomina_at')->nullable();
+            $table->text('istruzioni')->nullable();
+            $table->json('documents')->nullable()->comment('Documents uploaded for client');
+
             $table->timestamp('blacklist_at')->nullable()->index();
             $table->string('blacklisted_by')->nullable();
             $table->decimal('salary', 10, 2)->nullable();

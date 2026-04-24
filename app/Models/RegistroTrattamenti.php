@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Exception;
 
 class RegistroTrattamenti extends Model
 {
@@ -104,9 +105,35 @@ class RegistroTrattamenti extends Model
     protected static function booted()
     {
         static::creating(function ($registroTrattamenti) {
-            if (auth()->check() && method_exists(auth()->user(), 'current_company_id')) {
-                $registroTrattamenti->company_id = auth()->user()->current_company_id;
+            // Try to get company_id from authenticated user
+            if (auth()->check()) {
+                $user = auth()->user();
+
+                // First try current_company_id from user
+                if (isset($user->current_company_id) && !empty($user->current_company_id)) {
+                    $registroTrattamenti->company_id = $user->current_company_id;
+                    return;
+                }
+
+                // Fallback: try to get from Filament tenant
+                if (function_exists('filament') && filament()->getTenant()) {
+                    $tenant = filament()->getTenant();
+                    if ($tenant instanceof Company) {
+                        $registroTrattamenti->company_id = $tenant->id;
+                        return;
+                    }
+                }
+
+                // Last fallback: get first company if user has companies
+                if ($user->companies()->exists()) {
+                    $firstCompany = $user->companies()->first();
+                    $registroTrattamenti->company_id = $firstCompany->id;
+                    return;
+                }
             }
+
+            // If no company found, throw an exception to prevent null company_id
+            throw new Exception('Company ID is required but could not be determined from authenticated user.');
         });
     }
 }

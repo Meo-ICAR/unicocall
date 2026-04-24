@@ -19,6 +19,7 @@ class WebsiteResource extends Resource
     protected static ?string $model = Website::class;
     protected static bool $shouldRegisterNavigation = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {

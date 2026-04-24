@@ -19,6 +19,7 @@ class BranchResource extends Resource
     protected static ?string $model = Branch::class;
     protected static bool $shouldRegisterNavigation = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {

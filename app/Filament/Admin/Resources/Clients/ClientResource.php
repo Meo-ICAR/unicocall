@@ -22,6 +22,8 @@ class ClientResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Schema $schema): Schema
     {
         return ClientForm::configure($schema);
@@ -35,6 +37,8 @@ class ClientResource extends Resource
     public static function getRelations(): array
     {
         return [
+            WebsitesRelationManager::class,
+            SoftwareApplicationsRelationManager::class,
             SubappaltiClientToClientRelationManager::class,
             SubappaltiClientToEmployeeRelationManager::class,
         ];
