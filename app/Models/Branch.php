@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -72,6 +73,27 @@ class Branch extends Model
         return $this
             ->hasMany(Employee::class, 'company_branch_id')
             ->where('is_supervisor', true);
+    }
+
+    public function addresses(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function legalAddress(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable')->where('address_type_id', 10);
+    }
+
+    public function getPrimaryLegalAddressAttribute(): ?Address
+    {
+        return $this->legalAddress()->first();
+    }
+
+    public function getLegalAddressFormattedAttribute(): ?string
+    {
+        $legalAddress = $this->primaryLegalAddress;
+        return $legalAddress?->full_address;
     }
 
     // Accessors

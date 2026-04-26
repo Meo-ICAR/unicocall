@@ -20,6 +20,7 @@ class Address extends Model
         'numero',
         'street',
         'city',
+        'province',
         'zip_code',
         'address_type_id',
     ];
@@ -36,11 +37,29 @@ class Address extends Model
 
     public function getFullAddressAttribute(): string
     {
-        $parts = array_filter([
-            $this->street,
-            $this->city,
-            $this->zip_code,
-        ]);
+        $parts = [];
+
+        // Via e numero civico
+        if ($this->street) {
+            $parts[] = $this->street;
+        }
+        if ($this->numero) {
+            $parts[] = $this->numero;
+        }
+
+        // Città con provincia tra parentesi
+        if ($this->city) {
+            $cityPart = $this->city;
+            if ($this->province) {
+                $cityPart .= ' (' . strtoupper($this->province) . ')';
+            }
+            $parts[] = $cityPart;
+        }
+
+        // CAP (se presente)
+        if ($this->zip_code) {
+            $parts[] = $this->zip_code;
+        }
 
         return implode(', ', $parts);
     }

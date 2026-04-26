@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('companies', function (Blueprint $table) {
             $table->uuid('id')->primary()->comment('UUID v4 generato da Laravel');
             $table->string('name')->comment("Ragione Sociale dell'azienda");
+            $table->string('owner')->comment('Titolare azienda');
             $table->string('vat_number', 13)->nullable();
             $table->string('sponsor')->nullable();
             $table->enum('company_type', ['mediatore', 'call center', 'hotel', 'sw house'])->nullable();

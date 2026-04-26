@@ -18,6 +18,7 @@ class Company extends Model
     protected $fillable = [
         'name',
         'vat_number',
+        'owner',
         'sponsor',
         'company_type',
         'is_iso27001_certified',
@@ -189,6 +190,22 @@ class Company extends Model
     public function addresses(): MorphMany
     {
         return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function legalAddress(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable')->where('address_type_id', 10);
+    }
+
+    public function getPrimaryLegalAddressAttribute(): ?Address
+    {
+        return $this->legalAddress()->first();
+    }
+
+    public function getLegalAddressFormattedAttribute(): ?string
+    {
+        $legalAddress = $this->primaryLegalAddress;
+        return $legalAddress?->full_address;
     }
 
     public function registroTrattamentiItems(): HasMany

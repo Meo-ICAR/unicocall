@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('street')->nullable()->comment('Via');
             $table->string('numero')->nullable()->comment('Numero civico o identificativo indirizzo');
             $table->string('city')->nullable()->comment('Città o Comune');
+            $table->string('province', 2)->nullable()->comment('Provincia');
             $table->string('zip_code', 20)->nullable()->comment('CAP (Codice di Avviamento Postale)');
             $table->string('country')->nullable()->comment('Paese');
             $table->string('addressable_type')->comment('Classe del Modello collegato (es. App\Models\Client)');

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasPrivacySuggestions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use App\Traits\HasPrivacySuggestions;
 
 class Client extends Model implements HasMedia
 {
@@ -80,6 +81,27 @@ class Client extends Model implements HasMedia
     public function purchaseInvoices(): HasMany
     {
         return $this->hasMany(PurchaseInvoice::class, 'partita_iva', 'vat_number');
+    }
+
+    public function addresses(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function legalAddress(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable')->where('address_type_id', 10);
+    }
+
+    public function getPrimaryLegalAddressAttribute(): ?Address
+    {
+        return $this->legalAddress()->first();
+    }
+
+    public function getLegalAddressFormattedAttribute(): ?string
+    {
+        $legalAddress = $this->primaryLegalAddress;
+        return $legalAddress?->full_address;
     }
 
     /**
