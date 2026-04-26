@@ -7,6 +7,8 @@ use App\Filament\Admin\Resources\SoftwareApplications\Tables\SoftwareApplication
 use App\Models\SoftwareApplication;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Actions;
 use Illuminate\Database\Eloquent\Builder;

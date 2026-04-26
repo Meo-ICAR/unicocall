@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\Employees\Tables\EmployeesTable;
 use App\Models\Employee;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Actions;
 use Illuminate\Database\Eloquent\Builder;

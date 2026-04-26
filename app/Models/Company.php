@@ -196,6 +196,11 @@ class Company extends Model
         return $this->hasMany(RegistroTrattamentiItem::class);
     }
 
+    public function softwareApplications(): HasMany
+    {
+        return $this->hasMany(SoftwareApplication::class);
+    }
+
     public function getMainAddressAttribute(): ?Address
     {
         return $this->addresses()->where('address_type_id', 5)->first();  // Sede Legale

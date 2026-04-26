@@ -8,6 +8,7 @@ use App\Models\Registration;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Actions;
 use Illuminate\Database\Eloquent\Builder;

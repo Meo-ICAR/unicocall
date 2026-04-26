@@ -179,4 +179,48 @@ class PrivacySecurity extends Model
             ->whereNotNull('next_review_due')
             ->where('next_review_due', '<=', now());
     }
+
+    /**
+     * Get the mitigation factor for risk reduction calculation.
+     * Returns a value between 0.0 and 0.9 representing the risk reduction percentage.
+     */
+    public function getMitigationFactor(): float
+    {
+        // Base factor depends on implementation status
+        $baseFactor = match ($this->status) {
+            self::STATUS_IMPLEMENTED => 0.3,  // 30% reduction base
+            self::STATUS_IN_PROGRESS => 0.15,  // 15% reduction base
+            self::STATUS_PLANNED => 0.05,  // 5% reduction base
+            default => 0.0,  // Deprecated = no reduction
+        };
+
+        // Adjust factor based on type
+        $typeMultiplier = match ($this->type) {
+            self::TYPE_TECHNICAL => 1.2,  // Technical measures more effective
+            self::TYPE_ORGANIZATIONAL => 1.0,  // Organizational measures standard
+            default => 1.0,
+        };
+
+        // Adjust factor based on risk level (higher risk = more effective mitigation)
+        $riskMultiplier = match ($this->risk_level) {
+            self::RISK_CRITICAL => 1.5,  // Critical risks get best mitigation
+            self::RISK_HIGH => 1.3,  // High risks get good mitigation
+            self::RISK_MEDIUM => 1.1,  // Medium risks get moderate mitigation
+            self::RISK_LOW => 1.0,  // Low risks get standard mitigation
+            default => 1.0,
+        };
+
+        // Calculate final factor with maximum cap of 0.9 (90% reduction)
+        $finalFactor = $baseFactor * $typeMultiplier * $riskMultiplier;
+
+        return min($finalFactor, 0.9);
+    }
+
+    /**
+     * Get the mitigation factor as a percentage.
+     */
+    public function getMitigationPercentage(): int
+    {
+        return intval($this->getMitigationFactor() * 100);
+    }
 }

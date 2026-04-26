@@ -8,6 +8,8 @@ use App\Filament\Admin\RelationManagers\ClientsRelationManager;
 use App\Filament\Admin\RelationManagers\EmployeesRelationManager;
 use App\Filament\Admin\RelationManagers\RegistrationsRelationManager;
 use App\Filament\Admin\RelationManagers\RegistroTrattamentiItemRelationManager;
+use App\Filament\Admin\RelationManagers\SoftwareApplicationsRelationManager;
+use App\Filament\Admin\RelationManagers\WebsitesRelationManager;
 use App\Filament\Admin\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Admin\Resources\Companies\Pages\EditCompany;
 use App\Filament\Admin\Resources\Companies\Pages\ListCompanies;

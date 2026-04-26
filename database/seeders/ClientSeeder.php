@@ -21,8 +21,46 @@ class ClientSeeder extends Seeder
         try {
             // Get companies and client types
             $hassisto = Company::where('name', 'Hassisto Srl')->first();
+            // Create address for Innovatech
+            Address::create([
+                'name' => 'Sede Legale',
+                'addressable_type' => Company::class,
+                'addressable_id' => $hassisto->id,
+                'address_type_id' => $addressTypes['Sede Legale']->id ?? null,
+                'street' => 'Via Mercato 16e',
+                'city' => 'Mugnano di Napoli',
+                'zip_code' => '80028',
+                'country' => 'Italia',
+                'company_id' => $hassisto->id,
+            ]);
+
             $innovatech = Company::where('name', 'Innovatech Holdings Ltd')->first();
+
+            Address::create([
+                'name' => 'Sede Legale',
+                'addressable_type' => Company::class,
+                'addressable_id' => $innovatech->id,
+                'address_type_id' => $addressTypes['Sede Legale']->id ?? null,
+                'street' => 'Via Mercato 16e',
+                'city' => 'Mugnano di Napoli',
+                'zip_code' => '80028',
+                'country' => 'Italia',
+                'company_id' => $hassisto->id,
+            ]);
+
             $datlia = Company::where('name', 'DATALIA SRL')->first();
+
+            Address::create([
+                'name' => 'Sede Legale',
+                'addressable_type' => Company::class,
+                'addressable_id' => $datlia->id,
+                'address_type_id' => $addressTypes['Sede Legale']->id ?? null,
+                'street' => 'Via Mercato 16e',
+                'city' => 'Mugnano di Napoli',
+                'zip_code' => '80028',
+                'country' => 'Italia',
+                'company_id' => $hassisto->id,
+            ]);
 
             if (!$hassisto || !$innovatech || !$datlia) {
                 $this->command->error('Companies not found. Please run CompanySeeder first.');
@@ -49,6 +87,7 @@ class ClientSeeder extends Seeder
 
             // Create address for Innovatech
             Address::create([
+                'name' => 'Sede Legale',
                 'addressable_type' => Client::class,
                 'addressable_id' => $innovatechClient->id,
                 'address_type_id' => $addressTypes['Sede Legale']->id ?? null,
@@ -78,6 +117,7 @@ class ClientSeeder extends Seeder
 
             // Create legal address for DATALIA SRL (Sede legale)
             Address::create([
+                'name' => 'Sede Legale',
                 'addressable_type' => Client::class,
                 'addressable_id' => $datliaClient->id,
                 'address_type_id' => $addressTypes['Sede Legale']->id ?? null,
@@ -90,6 +130,7 @@ class ClientSeeder extends Seeder
 
             // Create operational address for DATALIA SRL (Sede operativa)
             Address::create([
+                'name' => 'Sede Operativa',
                 'addressable_type' => Client::class,
                 'addressable_id' => $datliaClient->id,
                 'address_type_id' => $addressTypes['Sede Operativa']->id ?? null,
