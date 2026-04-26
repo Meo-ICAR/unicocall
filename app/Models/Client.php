@@ -165,6 +165,16 @@ class Client extends Model implements HasMedia
         return $this->getTotalSalesIva() - $this->getTotalPurchaseIva();
     }
 
+    public function trainingRecords(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(TrainingRecord::class, 'trainable');
+    }
+
+    public function audits(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Audit::class, 'auditable');
+    }
+
     /**
      * Get all subappaltis where this client is the sub contractor
      */

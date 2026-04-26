@@ -62,7 +62,21 @@ class ClientSeeder extends Seeder
                 'company_id' => $hassisto->id,
             ]);
 
-            if (!$hassisto || !$innovatech || !$datlia) {
+            $phoenix2value = Company::where('name', 'Phoenix2Value srls')->first();
+
+            Address::create([
+                'name' => 'Sede Legale',
+                'addressable_type' => Company::class,
+                'addressable_id' => $phoenix2value->id,
+                'address_type_id' => $addressTypes['Sede Legale']->id ?? null,
+                'street' => 'Via Mercato 16e',
+                'city' => 'Mugnano di Napoli',
+                'zip_code' => '80028',
+                'country' => 'Italia',
+                'company_id' => $phoenix2value->id,
+            ]);
+
+            if (!$hassisto || !$innovatech || !$datlia || !$phoenix2value) {
                 $this->command->error('Companies not found. Please run CompanySeeder first.');
                 return;
             }

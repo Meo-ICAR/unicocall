@@ -18,6 +18,7 @@ class CompanySeeder extends Seeder
             // Create Hassisto Srl
             $hassisto = Company::create([
                 'name' => 'Hassisto Srl',
+                'owner' => 'PIER GIUSEPPE MEO',
                 'vat_number' => '09006331210',
                 'company_type' => 'sw house',
             ]);
@@ -27,11 +28,13 @@ class CompanySeeder extends Seeder
             // Create Innovatech Holdings Ltd
             $innovatech = Company::create([
                 'name' => 'Innovatech Holdings Ltd',
+                'owner' => 'MICHELE FASOLINO',
                 'vat_number' => 'GB361144034',
-                'company_type' => 'call center',
+                'company_type' => 'sw house',
                 'contact_email' => 'info@innovatech.co.uk',
+                'dpo_email' => 'privacy@innovatech.co.uk',
                 'page_header' => 'Innovatech Holdings Ltd - Leading Technology Solutions',
-                'page_footer' => '© 2024 Innovatech Holdings Ltd. Company number: 12958832',
+                'page_footer' => ' 2024 Innovatech Holdings Ltd. Company number: 12958832',
             ]);
 
             $this->command->info("Company created: {$innovatech->name} (ID: {$innovatech->id})");
@@ -39,14 +42,29 @@ class CompanySeeder extends Seeder
             // Create DATALIA SRL
             $datlia = Company::create([
                 'name' => 'DATALIA SRL',
+                'owner' => 'TIZIO CAIO',
                 'vat_number' => '05993670651',
-                'company_type' => 'call center',
+                'company_type' => 'list provider',
                 'contact_email' => 'datalia@pec.it',
+                'dpo_email' => 'privacy@datalia.it',
                 'page_header' => 'DATALIA SRL - Servizi di Call Center e Telemarketing',
-                'page_footer' => '© 2024 DATALIA SRL - P.IVA 05993670651 - Capitale Sociale €10.000,00',
+                'page_footer' => ' 2024 DATALIA SRL - P.IVA 05993670651 - Capitale Sociale €10.000,00',
             ]);
 
             $this->command->info("Company created: {$datlia->name} (ID: {$datlia->id})");
+
+            // Create Phoenix2Value
+            $phoenix2value = Company::create([
+                'name' => 'Phoenix2Value srls',
+                'owner' => 'SEMPIO CAIO',
+                'vat_number' => '05993670000',
+                'company_type' => 'list provider',
+                'contact_email' => 'phoenix2value@pec.it',
+                'page_header' => 'Phoenix2Value - Servizi di List Provider',
+                'page_footer' => ' 2024 Phoenix2Value - P.IVA 05993670651 - Capitale Sociale €10.000,00',
+            ]);
+
+            $this->command->info("Company created: {$phoenix2value->name} (ID: {$phoenix2value->id})");
         } catch (\Exception $e) {
             Log::error('Error creating company: ' . $e->getMessage());
             $this->command->error('Error creating company: ' . $e->getMessage());

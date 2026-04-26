@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
             $table->string('name');
             $table->string('first_name')->nullable();
-            $table->string('owner')->comment('Titolare azienda');
+            $table->string('owner')->comment('Titolare azienda')->nullable();
             $table->string('tax_code', 16)->nullable();
             $table->string('vat_number', 20)->nullable();
             $table->string('email')->nullable();

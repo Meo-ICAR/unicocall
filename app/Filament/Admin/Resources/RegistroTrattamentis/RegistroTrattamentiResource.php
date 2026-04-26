@@ -23,7 +23,7 @@ class RegistroTrattamentiResource extends Resource
     protected static ?string $model = RegistroTrattamenti::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
+  protected static string|\UnitEnum|null $navigationGroup = 'Privacy & GDPR';
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema

@@ -353,6 +353,11 @@ class Employee extends Model
         ];
     }
 
+    public function trainingRecords(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(TrainingRecord::class, 'trainable');
+    }
+
     /**
      * Get all subappaltis where this employee is the sub contractor
      */

@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Clients;
 
 use App\Filament\Admin\RelationManagers\SubappaltiClientToClientRelationManager;
 use App\Filament\Admin\RelationManagers\SubappaltiClientToEmployeeRelationManager;
+use App\Filament\Admin\RelationManagers\TrainingRecordsRelationManager;
 use App\Filament\Admin\Resources\Clients\Pages\CreateClient;
 use App\Filament\Admin\Resources\Clients\Pages\EditClient;
 use App\Filament\Admin\Resources\Clients\Pages\ListClients;
@@ -41,6 +42,7 @@ class ClientResource extends Resource
             SoftwareApplicationsRelationManager::class,
             SubappaltiClientToClientRelationManager::class,
             SubappaltiClientToEmployeeRelationManager::class,
+            TrainingRecordsRelationManager::class,
         ];
     }
 

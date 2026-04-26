@@ -22,6 +22,12 @@ class DatabaseSeeder extends Seeder
             CompanySeeder::class,
         ]);
         $company = Company::first();
+
+        if (!$company) {
+            $this->command->error('No company found. Please check CompanySeeder.');
+            return;
+        }
+
         $user = User::factory()->create([
             'name' => 'superadmin',
             'email' => 'hassistosrl@gmail.com',
@@ -69,6 +75,11 @@ class DatabaseSeeder extends Seeder
             DpiaRiskSeeder::class,
             DpiaItemSeeder::class,
             ClientSeeder::class,
+            RemediationSeeder::class,
+            Phoenix2ValueEmployeeSeeder::class,
+            Phoenix2ValueWebmasterClientSeeder::class,
+            Phoenix2ValueWebsiteSeeder::class,
+            Phoenix2ValueSocialSeeder::class,
             //     CompanySeeder::class,
             //     FacebookLeadAcquisitionSeeder::class,
             //     LeadAcquisitionProcessSeeder::class,
